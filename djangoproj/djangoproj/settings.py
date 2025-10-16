@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
+    "ninja",
+    "djangoapp",
 ]
 
 MIDDLEWARE = [
@@ -66,7 +69,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "djangoproj.wsgi.application"
+# WSGI_APPLICATION = "djangoproj.wsgi.application"
+ASGI_APPLICATION = "djangoproj.asgi.application"
 
 
 # Database
