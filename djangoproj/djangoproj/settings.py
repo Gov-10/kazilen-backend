@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     "corsheaders",
     "ninja",
     "djangoapp",
+    "customerSide",
+    "workerSide",
+    "homeSide",
 ]
 
 MIDDLEWARE = [
