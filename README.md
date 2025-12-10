@@ -1,5 +1,5 @@
 This is the repo for Kazilen that contains all of the backend microservices, in 3 separate folders.
 Backend frameworks used: 
 1. Django Ninja
-2. FastAPI
-3. SpringBoot
+2. FastAPI (for location tracking)
+3. SpringBoot (for payment and stuff)
