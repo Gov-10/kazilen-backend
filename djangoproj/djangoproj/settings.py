@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     "djangoapp",
     "customerSide",
     "workerSide",
-    "homeSide",
 ]
 
 MIDDLEWARE = [
@@ -76,8 +75,8 @@ TEMPLATES = [
 
 
 CORS_ALLOWED_ORIGINS = [
-    "https://localhost:3000",
-    "https://127.0.0.1:3000",
+    "https://localhost:5000",
+    "https://127.0.0.1:5000",
 ]
 # WSGI_APPLICATION = "djangoproj.wsgi.application"
 ASGI_APPLICATION = "djangoproj.asgi.application"
