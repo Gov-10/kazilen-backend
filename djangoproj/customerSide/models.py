@@ -1,5 +1,5 @@
 from django.db import models
-
+from phonenumber_field.modelfields import PhoneNumberField
 
 class Customer(models.Model):
     name = models.CharField(
@@ -7,7 +7,7 @@ class Customer(models.Model):
         verbose_name="fullName",
     )
     address = models.CharField(max_length=500)
-    phoneNo = models.CharField(max_length=15, unique=True)
+    phoneNo = PhoneNumberField(unique=True)
     email = models.EmailField(
         max_length=256,
         unique=True,

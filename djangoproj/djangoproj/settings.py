@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "djangoapp",
     "customerSide",
     "workerSide",
+    "phonenumber_field",
 ]
 
 MIDDLEWARE = [
