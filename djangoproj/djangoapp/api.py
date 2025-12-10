@@ -1,1 +1,2 @@
-from ninja import NinjaApi
+from ninja import NinjaAPI
+api = NinjaAPI()
