@@ -41,8 +41,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "ninja",
     "djangoapp",
-    "customerSide",
-    "workerSide",
     "phonenumber_field",
 ]
 
