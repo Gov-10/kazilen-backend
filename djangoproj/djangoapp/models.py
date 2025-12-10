@@ -15,7 +15,7 @@ class Customer(models.Model):
     )
 
 
-class history(models.Model):
+class History(models.Model):
     customer = models.ForeignKey(
         Customer,
         on_delete=models.CASCADE,
@@ -25,7 +25,7 @@ class history(models.Model):
     timestmp = models.DateTimeField(auto_now=True)
 
 
-class worker(models.Model):
+class Worker(models.Model):
     name = models.CharField(
         max_length=100,
     )
