@@ -6,7 +6,12 @@ from .models import Customer, Worker, History
 from .schemas import CustomerSchema, WorkerSchema, HistorySchema
 api = NinjaAPI()
 
-@api.get("/worker", response=List[WorkerSchema])
+@api.get("/workers", response=List[WorkerSchema])
 def getAllWorker(request):
     #workers = get_object_or_404(**request)
     return Worker.objects.all()
+
+@api.get("/worker/{name}", response=WorkerSchema)
+def getSingleWorker(request, name: str):
+        worker = get_object_or_404(Worker, name=name)
+        return worker
