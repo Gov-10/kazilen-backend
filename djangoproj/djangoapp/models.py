@@ -32,7 +32,8 @@ class Worker(models.Model):
     address = models.CharField(
         max_length=500,
     )
-    phoneNo = PhoneNumberField(
+    phoneNo = models.CharField(
+        max_length=15,
         unique=True,
     )
     jobProfile = models.CharField(
