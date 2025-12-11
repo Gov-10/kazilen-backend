@@ -9,4 +9,4 @@ api = NinjaAPI()
 @api.get("/worker", response=List[WorkerSchema])
 def getAllWorker(request):
     #workers = get_object_or_404(**request)
-    workers = Worker.objects.all()
+    return Worker.objects.all()
