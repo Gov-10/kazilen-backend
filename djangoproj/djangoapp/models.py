@@ -39,3 +39,6 @@ class Worker(models.Model):
     jobProfile = models.CharField(
         max_length=250,
     )
+    rating = models.FloatField()
+    price = models.DecimalField()
+    discription = models.CharField(max_length=200)
