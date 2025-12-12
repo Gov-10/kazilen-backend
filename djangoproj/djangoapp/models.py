@@ -40,5 +40,5 @@ class Worker(models.Model):
         max_length=250,
     )
     rating = models.FloatField()
-    price = models.DecimalField()
+    price = models.DecimalField(max_digits=11, decimal_places=3)
     discription = models.CharField(max_length=200)
