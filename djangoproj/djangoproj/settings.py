@@ -73,10 +73,7 @@ TEMPLATES = [
 ]
 
 
-CORS_ALLOWED_ORIGINS = [
-    "https://localhost:5000",
-    "https://127.0.0.1:5000",
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # WSGI_APPLICATION = "djangoproj.wsgi.application"
