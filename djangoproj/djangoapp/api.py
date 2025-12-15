@@ -8,17 +8,17 @@ from .schemas import CustomerSchema, WorkerSchema, HistorySchema
 api = NinjaAPI()
 
 
-@api.get("/workers", response=List[WorkerSchema])
+@api.get("/worker", response=List[WorkerSchema])
 def getAllWorker(request):
     return Worker.objects.all()
 
 
-@api.get("/worker/{name}", response=WorkerSchema)
-def getSingleWorker(request, name: str):
-    worker = get_object_or_404(Worker, name=name)
-    return worker
+# @api.get("/worker/{name}", response=WorkerSchema)
+# def getSingleWorker(request, name: str):
+#     worker = get_object_or_404(Worker, name=name)
+#     # return worker
 
-@api.get("/workerfilter/{filter}", response=List[WorkerSchema])
+@api.get("/worker/{filter}", response=List[WorkerSchema])
 def getFilterWorker(request, filter: str):
     field, value = filter.split("&")
     print(field, value)
