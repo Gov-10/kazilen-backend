@@ -26,6 +26,15 @@ class History(models.Model):
 
 
 class Worker(models.Model):
+    class JobProfiles(models.TextChoices):
+        vehicle = "vehicle", "mechanic"
+        health = "health", "doctor"
+        carpenter = "carpenter", "carpenter"
+        electrician = "electrician", "electrician"
+        home = "home", "home cleaning/services"
+        appliance = "appliance", "electronic device"
+        labour = "labour", "manual labour"
+
     name = models.CharField(
         max_length=100,
     )
@@ -37,7 +46,9 @@ class Worker(models.Model):
         unique=True,
     )
     jobProfile = models.CharField(
-        max_length=250,
+        max_length=30,
+        choices=JobProfiles.choices,
+        default=JobProfiles.labour,
     )
     rating = models.FloatField()
     price = models.DecimalField(max_digits=11, decimal_places=3)
