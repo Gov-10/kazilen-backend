@@ -8,15 +8,10 @@ api = NinjaAPI()
 
 @api.get("/workers", response=List[WorkerSchema])
 def getAllWorker(request):
-    #workers = get_object_or_404(**request)
     return Worker.objects.all()
 
 @api.get("/worker/{name}", response=WorkerSchema)
 def getSingleWorker(request, name: str):
-        worker = get_object_or_404(Worker, jobProfile=name)
+        worker = get_object_or_404(Worker, name=name)
         return worker
 
-@api.get("/worker/jobProfile/{filter}", response=List[WorkerSchema])
-def getWorkersByJob(request, filter:str):
-    worker = get_object_or_404(Worker, jobProfile=filter)
-    return worker
