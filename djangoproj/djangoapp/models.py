@@ -1,4 +1,6 @@
+from enum import unique
 from django.db import models
+import phonenumber_field
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -41,15 +43,15 @@ class Worker(models.Model):
     address = models.CharField(
         max_length=500,
     )
-    phoneNo = models.CharField(
-        max_length=15,
-        unique=True,
-    )
+    phoneNo = PhoneNumberField(null=False, blank=False, unique=True)
     jobProfile = models.CharField(
         max_length=30,
         choices=JobProfiles.choices,
         default=JobProfiles.labour,
     )
+
     rating = models.FloatField()
+
     price = models.DecimalField(max_digits=11, decimal_places=3)
+
     discription = models.CharField(max_length=200)

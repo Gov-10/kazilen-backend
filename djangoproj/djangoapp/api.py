@@ -19,17 +19,6 @@ def getSingleWorker(request, name: str):
     return worker
 
 
-@api.get("/getworkerList/{filer}/{value}", response=[WorkerSchema])
-def getWorkerList(request, filter: str, value: str):
-    match filter:
-        case "name":
-            workers = Worker.objects.get(name=value)
-        case "jobProfile":
-            workers = Worker.objects.get(jobProfile=value)
-        case "rating":
-            workers = Worker.objects.get(rating=value)
-        case "location":
-            workers = Worker.objects.get(location=value)
-        case _:
-            return 
-    return workers
+@api.get("/getworkerList/{filter}", response=[WorkerSchema])
+def getWorkerList(request, filter: str):
+    return Worker.objects.get(jobProfile = filter)
