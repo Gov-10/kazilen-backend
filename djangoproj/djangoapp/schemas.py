@@ -14,22 +14,14 @@ class CustomerSchema(ModelSchema):
         fields = "__all__"
 
 
-#class WorkerSchema(Schema):
-#    id: int
-#    name: str
-#    jobProfile: jobIdentifier
-#    address: str
-#    phoneNo: List[int]
-#    description: str
-#    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
+class WorkerSchema(Schema):
+    id: int
+    name: str
+    jobProfile: str
+    address: str
+    phoneNo: List[int]
+    description: str
 
-class WorkerSchema(ModelSchema):
-    model_config = ConfigDict(
-            from_attributes=True,
-            model = Worker,
-            arbitrary_types_allowed=True,
-            fields = '__all__',
-            )
 
 class HistorySchema(ModelSchema):
     class Meta:

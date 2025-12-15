@@ -18,7 +18,3 @@ def getSingleWorker(request, name: str):
     worker = get_object_or_404(Worker, name=name)
     return worker
 
-
-@api.get("/getworkerList/{filter}", response=[WorkerSchema])
-def getWorkerList(request, filter: str):
-    return Worker.objects.get(jobProfile = filter)

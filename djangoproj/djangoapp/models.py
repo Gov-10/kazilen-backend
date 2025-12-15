@@ -1,6 +1,4 @@
-from enum import unique
 from django.db import models
-import phonenumber_field
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -28,14 +26,16 @@ class History(models.Model):
 
 
 class Worker(models.Model):
-    class JobProfiles(models.TextChoices):
-        vehicle = "vehicle", "mechanic"
-        health = "health", "doctor"
-        carpenter = "carpenter", "carpenter"
-        electrician = "electrician", "electrician"
-        home = "home", "home cleaning/services"
-        appliance = "appliance", "electronic device"
-        labour = "labour", "manual labour"
+    JobProfiles = [
+        ("vehicle", "mechanic"),
+        ("mechanic", "health"),
+        ("doctor", "carpenter"),
+        ("carpenter", "electrician"),
+        ("electrician", "home"),
+        ("home cleaning/services", "appliance"),
+        ("electronic device", "labour"),
+        ("manual", " labour"),
+    ]
 
     name = models.CharField(
         max_length=100,
@@ -46,8 +46,8 @@ class Worker(models.Model):
     phoneNo = PhoneNumberField(null=False, blank=False, unique=True)
     jobProfile = models.CharField(
         max_length=30,
-        choices=JobProfiles.choices,
-        default=JobProfiles.labour,
+        choices=JobProfiles,
+        default=JobProfiles[-1],
     )
 
     rating = models.FloatField()
