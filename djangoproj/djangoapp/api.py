@@ -13,5 +13,10 @@ def getAllWorker(request):
 
 @api.get("/worker/{name}", response=WorkerSchema)
 def getSingleWorker(request, name: str):
-        worker = get_object_or_404(Worker, name=name)
+        worker = get_object_or_404(Worker, jobProfile=name)
         return worker
+
+@api.get("/worker/jobProfile/{filter}", response=List[WorkerSchema])
+def getWorkersByJob(request, filter:str):
+    worker = get_object_or_404(Worker, jobProfile=filter)
+    return worker
