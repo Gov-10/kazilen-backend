@@ -21,13 +21,14 @@ def getSingleWorker(request, name: str):
 @api.get("/workerfilter/{filter}", response=List[WorkerSchema])
 def getFilterWorker(request, filter: str):
     field, value = filter.split("&")
+    print(field, value)
     match field:
         case "NM":
-            workers = Worker.objects.get(name=value)
+            workers = Worker.objects.filter(name=value)
         case "JP":
-            workers = Worker.objects.get(jobProfile=value)
+            workers = Worker.objects.filter(jobProfile=value)
         case "LC":
-            workers = Worker.objects.get(location=value)
+            workers = Worker.objects.filter(address=value)
         case _:
             return
     return workers
