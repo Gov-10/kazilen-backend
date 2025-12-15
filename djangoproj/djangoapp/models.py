@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.fields import CharField
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -43,7 +44,7 @@ class Worker(models.Model):
     address = models.CharField(
         max_length=500,
     )
-    phoneNo = PhoneNumberField(null=False, blank=False, unique=True)
+    phoneNo = CharField(max_length=15, unique=True)
     jobProfile = models.CharField(
         max_length=30,
         choices=JobProfiles,

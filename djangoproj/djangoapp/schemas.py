@@ -1,11 +1,8 @@
-from typing import List, Literal
-from ninja import ModelSchema, Schema
+from decimal import Decimal
+from typing import Any
+from ninja import Field, ModelSchema, Schema
 from pydantic import ConfigDict
 from .models import Customer, Worker, History
-
-jobIdentifier = Literal[
-    "vehicle", "health", "carpenter", "electrician", "home", "appliance", "labour"
-]
 
 
 class CustomerSchema(ModelSchema):
@@ -14,14 +11,27 @@ class CustomerSchema(ModelSchema):
         fields = "__all__"
 
 
+#class WorkerSchema(ModelSchema):
+#    class Meta:
+#        model = Worker
+#        fields = "__all__"
 class WorkerSchema(Schema):
-    id: int
     name: str
-    jobProfile: str
     address: str
-    phoneNo: List[int]
-    description: str
-
+    phoneNoObj: Any = Field(alias='phoneNo') 
+    jobProfile: str
+    rating: float
+    price: Decimal
+    discription: str
+    @property
+    def phoneNo(self) -> str:
+        if self.phoneNoObj:
+            return str(self.phoneNoObj)
+        return ""
+    class Config:
+        json_encoders = {Decimal: str}
+        from_attributes = True
+        extra = "allow"
 
 class HistorySchema(ModelSchema):
     class Meta:
