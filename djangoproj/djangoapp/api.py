@@ -9,9 +9,9 @@ from .schemas import CustomerSchema, WorkerSchema, HistorySchema
 api = NinjaAPI()
 
 
-# class workerFilter(Query):
-    # category: Optional[str] = None
-    # subcategory: Optional[str] = None
+class workerFilter(Query):
+    category: Optional[str] = None
+    subcategory: Optional[str] = None
 
 
 @api.get("/worker", response=List[WorkerSchema])
@@ -26,6 +26,8 @@ def getAllWorker(request):
 
 
 @api.get("/filterworker", response=List[WorkerSchema])
-def getFilterWorker(request, filter: str):
+def getFilterWorker(request, filter: workerFilter):
     workers: QuerySet[Worker] = Worker.objects.all();
+    if filter.category:
+        workers = workers.filter(category=filter.category)
     return workers
