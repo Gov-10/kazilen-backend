@@ -1,7 +1,8 @@
 from django.db import models
 from django.db.models.fields import CharField
+from django.utils import choices
 from phonenumber_field.modelfields import PhoneNumberField
-
+from multiselectfield import MultiSelectField
 
 class Customer(models.Model):
     name = models.CharField(
@@ -37,7 +38,11 @@ class Worker(models.Model):
         ("electronic device", "labour"),
         ("manual", " labour"),
     ]
-
+    category = [
+        ("consult", "be a consultant"),
+        ("fixed", "Fixed Charges"),
+        ("Book", "Hourly pay"),
+    ]
     name = models.CharField(
         max_length=100,
     )
@@ -50,7 +55,7 @@ class Worker(models.Model):
         choices=JobProfiles,
         default=JobProfiles[-1],
     )
-
+    subcategory = MultiSelectField(choices=category, max_choices=3, max_length=50)
     rating = models.FloatField()
 
     price = models.DecimalField(max_digits=11, decimal_places=3)
