@@ -30,4 +30,6 @@ def getFilterWorker(request, filter: Query[workerFilter]):
     workers: QuerySet[Worker] = Worker.objects.all();
     if filter.category:
         workers = workers.filter(category=filter.category)
+    if filter.subcategory:
+        workers = workers.filter(subcategory=filter.subcategory)
     return workers

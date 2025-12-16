@@ -41,7 +41,7 @@ class Worker(models.Model):
     SubCategory = (
         ("consult", "be a consultant"),
         ("fixed", "Fixed Charges"),
-        ("Book", "Hourly pay")
+        ("book", "Hourly pay")
         )
     name = models.CharField(
         max_length=100,
