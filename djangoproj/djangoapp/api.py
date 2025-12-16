@@ -1,4 +1,4 @@
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from typing_extensions import List
 from typing import List, Optional
 from ninja import NinjaAPI, Query, Schema
@@ -12,7 +12,6 @@ api = NinjaAPI()
 class workerFilter(Schema):
     category: Optional[str] = None
     subcategory: Optional[str] = None
-
 
 @api.get("/worker", response=List[WorkerSchema])
 def getAllWorker(request):
@@ -28,6 +27,7 @@ def getAllWorker(request):
 @api.get("/filterworker", response=List[WorkerSchema])
 def getFilterWorker(request, filter: Query[workerFilter]):
     workers: QuerySet[Worker] = Worker.objects.all();
+    q = filter.get_filter_expression()
     if filter.category:
         workers = workers.filter(category=filter.category)
     if filter.subcategory:
