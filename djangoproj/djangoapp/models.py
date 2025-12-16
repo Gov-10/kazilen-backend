@@ -36,13 +36,13 @@ class Worker(models.Model):
         ("electrician", "home"),
         ("home cleaning/services", "appliance"),
         ("electronic device", "labour"),
-        ("manual", " labour"),
+        ("manual", " labour")
     ]
-    category = [
+    SubCategory = (
         ("consult", "be a consultant"),
         ("fixed", "Fixed Charges"),
-        ("Book", "Hourly pay"),
-    ]
+        ("Book", "Hourly pay")
+        )
     name = models.CharField(
         max_length=100,
     )
@@ -55,7 +55,7 @@ class Worker(models.Model):
         choices=JobProfiles,
         default=JobProfiles[-1],
     )
-    subcategory = MultiSelectField(choices=category, max_choices=3, max_length=50)
+    subcategory = MultiSelectField(choices=SubCategory, default=["consultant"], min_choices=1, max_length=20)
     rating = models.FloatField()
 
     price = models.DecimalField(max_digits=11, decimal_places=3)
