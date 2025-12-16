@@ -45,7 +45,7 @@ class Worker(models.Model):
         max_length=500,
     )
     phoneNo = CharField(max_length=15, unique=True)
-    jobProfile = models.CharField(
+    category = models.CharField(
         max_length=30,
         choices=JobProfiles,
         default=JobProfiles[-1],

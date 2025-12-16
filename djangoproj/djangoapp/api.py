@@ -1,11 +1,17 @@
+from django.db.models import QuerySet
 from typing_extensions import List
-from typing import List
-from ninja import NinjaAPI
+from typing import List, Optional
+from ninja import NinjaAPI, Query
 from django.shortcuts import get_object_or_404
 from .models import Customer, Worker, History
 from .schemas import CustomerSchema, WorkerSchema, HistorySchema
 
 api = NinjaAPI()
+
+
+# class workerFilter(Query):
+    # category: Optional[str] = None
+    # subcategory: Optional[str] = None
 
 
 @api.get("/worker", response=List[WorkerSchema])
@@ -18,17 +24,8 @@ def getAllWorker(request):
 #     worker = get_object_or_404(Worker, name=name)
 #     # return worker
 
+
 @api.get("/filterworker", response=List[WorkerSchema])
-def getFilterWorker(request, value: str, field: str = "ALL"):
-    match field:
-        case "NM":
-            workers = Worker.objects.filter(name=value)
-        case "JP":
-            workers = Worker.objects.filter(jobProfile=value)
-        case "LC":
-            workers = Worker.objects.filter(address=value)
-        case "ALL":
-            workers = Worker.objects.all()
-        case _:
-            return
+def getFilterWorker(request, filter: str):
+    workers: QuerySet[Worker] = Worker.objects.all();
     return workers
