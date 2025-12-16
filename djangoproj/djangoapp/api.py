@@ -18,10 +18,8 @@ def getAllWorker(request):
 #     worker = get_object_or_404(Worker, name=name)
 #     # return worker
 
-@api.get("/worker/{filter}", response=List[WorkerSchema])
-def getFilterWorker(request, filter: str):
-    field, value = filter.split("&")
-    print(field, value)
+@api.get("/filterworker", response=List[WorkerSchema])
+def getFilterWorker(request, value: str, field: str = "ALL"):
     match field:
         case "NM":
             workers = Worker.objects.filter(name=value)
@@ -29,6 +27,8 @@ def getFilterWorker(request, filter: str):
             workers = Worker.objects.filter(jobProfile=value)
         case "LC":
             workers = Worker.objects.filter(address=value)
+        case "ALL":
+            workers = Worker.objects.all()
         case _:
             return
     return workers

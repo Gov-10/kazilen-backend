@@ -55,4 +55,4 @@ class Worker(models.Model):
 
     price = models.DecimalField(max_digits=11, decimal_places=3)
 
-    discription = models.CharField(max_length=200)
+    description = models.CharField(max_length=200)
