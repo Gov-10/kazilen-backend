@@ -26,7 +26,15 @@ def getAllWorker(request):
 
 
 @api.get("/filterworker", response=List[WorkerSchema])
-def getFilterWorker(request, filter: workerFilter ):
-    workers = Worker.objects.all();
-    workers = filter.filter(workers)
+def getFilterWorker(
+    request,
+    category: Optional[str] = Query(None),
+    subcategory: Optional[str] = Query(None),
+):
+    filters = Q()
+    if category:
+        filters &= Q(category=category)
+    if subcategory:
+        filters &= Q(subcategory=subcategory)
+    workers = Worker.objects.filter(filters)
     return workers
