@@ -4,7 +4,6 @@ from ninja import Field, ModelSchema, Schema
 from .models import Customer, Worker, History
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
-
 class CustomerSchema(ModelSchema):
     class Meta:
         model = Customer
@@ -13,7 +12,7 @@ class CustomerSchema(ModelSchema):
 
 class WorkerSchema(ModelSchema):
     subcategory: List[str]
-
+    phoneNo: PhoneNumber
     class Meta:
         model = Worker
         fields = "__all__"
