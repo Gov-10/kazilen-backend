@@ -10,15 +10,9 @@ api = NinjaAPI()
 
 
 class workerFilter(FilterSchema):
-    category: Optional[List[str]] = None
-    subcategory: Optional[List[str]] = None
+    category: Optional[List[str]]
+    subcategory: Optional[List[str]]
 
-    def filter_category(self, value: List[str]) -> Q:
-        category_value = value[0]
-        return Q(category=category_value)
-    def filter_subcategory(self, value: List[str]) -> Q:
-        subcategory_value = value[0]
-        return Q(subcategory__contains=subcategory_value)
 
 @api.get("/worker", response=List[WorkerSchema])
 def getAllWorker(request):
@@ -32,11 +26,7 @@ def getAllWorker(request):
 
 
 @api.get("/filterworker", response=List[WorkerSchema])
-def getFilterWorker(request, filter: workerFilter = Query(...)):
+def getFilterWorker(request, filter: workerFilter ):
     workers = Worker.objects.all();
     workers = filter.filter(workers)
-    # if filter.category:
-    #     workers = workers.filter(category=filter.category)
-    # if filter.subcategory:
-    #     workers = workers.filter(subcategory=filter.subcategory)
     return workers
