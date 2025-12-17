@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import List
 from ninja import Field, ModelSchema, Schema
 from .models import Customer, Worker, History
 
@@ -10,6 +11,7 @@ class CustomerSchema(ModelSchema):
 
 
 class WorkerSchema(ModelSchema):
+    subcategory: List[str]
     class Meta:
         model = Worker
         fields = "__all__"
