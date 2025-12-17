@@ -49,7 +49,7 @@ class Worker(models.Model):
     address = models.CharField(
         max_length=500,
     )
-    phoneNo = CharField(max_length=15, unique=True)
+    phoneNo = PhoneNumberField(unique=True)
     category = models.CharField(
         max_length=30,
         choices=JobProfiles,

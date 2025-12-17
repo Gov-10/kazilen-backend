@@ -12,6 +12,7 @@ class CustomerSchema(ModelSchema):
 
 class WorkerSchema(ModelSchema):
     subcategory: List[str]
+
     class Meta:
         model = Worker
         fields = "__all__"
