@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import List
 from ninja import Field, ModelSchema, Schema
 from .models import Customer, Worker, History
+from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
 class CustomerSchema(ModelSchema):
