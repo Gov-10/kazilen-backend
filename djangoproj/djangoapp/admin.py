@@ -1,3 +1,5 @@
 from django.contrib import admin
-
-# Register your models here.
+from .models import Customer, Worker, History
+admin.site.register(Customer)
+admin.site.register(Worker)
+admin.site.register(History)
