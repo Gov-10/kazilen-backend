@@ -5,6 +5,7 @@ from ninja import FilterSchema, NinjaAPI, Query, Schema
 from django.shortcuts import get_object_or_404
 from .models import Customer, Worker, History
 from .schemas import CustomerSchema, WorkerSchema, HistorySchema
+from .utils.otp_generator import otp_gen
 
 api = NinjaAPI()
 
@@ -12,7 +13,6 @@ api = NinjaAPI()
 # class workerFilter(FilterSchema):
 #     category: Optional[List[str]]
 #     subcategory: Optional[List[str]]
-
 
 @api.get("/worker", response=List[WorkerSchema])
 def getAllWorker(request):
@@ -38,3 +38,8 @@ def getFilterWorker(
         filters &= Q(subcategory=subcategory)
     workers = Worker.objects.filter(filters)
     return workers
+
+@api.get("/check")
+def check_req(request):
+    otp = otp_gen()
+    return otp
