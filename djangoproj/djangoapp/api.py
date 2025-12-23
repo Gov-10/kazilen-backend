@@ -9,6 +9,8 @@ import hashlib
 from .utils.otp_generator import otp_gen
 from redis import Redis
 from dotenv import load_dotenv
+import os
+
 load_dotenv()
 api = NinjaAPI()
 
