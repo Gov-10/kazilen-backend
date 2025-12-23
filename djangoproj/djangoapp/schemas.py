@@ -31,8 +31,14 @@ class WorkerSchema(ModelSchema):
 #    rating: float
 #    price: Decimal
 #    discription: str
-
 class HistorySchema(ModelSchema):
     class Meta:
         model = History
         fields = "__all__"
+
+class SendOTPSchema(Schema):
+    phone : str
+
+class VerifyOTPSchema(Schema):
+    phone : str
+    otp : str

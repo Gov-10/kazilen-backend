@@ -39,3 +39,4 @@ types-PyYAML==6.0.12.20250915
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 zope.interface==8.1
+redis
