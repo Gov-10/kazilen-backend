@@ -27,7 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+# Custom Fiels
+REDIS_HOST = 'localhost'
+REDIS_PORT = '6379'
+REDIS_DB = 0                                                                                                                                                      
 # Application definition
 
 INSTALLED_APPS = [
