@@ -7,10 +7,10 @@ from .models import Customer, Worker, History
 from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema
 import hashlib
 from .utils.otp_generator import otp_gen
+from .utils.send_otp import send_otp_sms
 from redis import Redis
 from dotenv import load_dotenv
 import os
-
 load_dotenv()
 api = NinjaAPI()
 
@@ -56,8 +56,9 @@ def send_otp(request, payload: SendOTPSchema):
    otp = otp_gen()
    hashed = hashlib.sha256(otp.encode()).hexdigest()
    redis_client.setex(f"otp:{phone}", 600, hashed)
-   print("OTP: ", otp)
-   return {"otp" : otp}
+   send_otp_sms(phone, otp)
+   #print("OTP: ", otp)
+   return {"status": True, "message": "OTP Sent successfully"}
 
 @api.post("/verify-otp")
 def verify_otp(request, payload: VerifyOTPSchema):
