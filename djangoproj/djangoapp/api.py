@@ -30,12 +30,6 @@ def getAllWorker(request):
     return Worker.objects.all()
 
 
-# @api.get("/worker/{name}", response=WorkerSchema)
-# def getSingleWorker(request, name: str):
-#     worker = get_object_or_404(Worker, name=name)
-#     # return worker
-
-
 @api.get("/filterworker", response=List[WorkerSchema])
 def getFilterWorker(
     request,
