@@ -7,7 +7,7 @@ from .models import Customer, Worker, History
 from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema
 import hashlib
 from .utils.otp_generator import otp_gen
-from .utils.send_otp import send_otp_sms
+from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
 from redis import Redis
 from dotenv import load_dotenv
 import os
@@ -30,12 +30,6 @@ def getAllWorker(request):
     return Worker.objects.all()
 
 
-# @api.get("/worker/{name}", response=WorkerSchema)
-# def getSingleWorker(request, name: str):
-#     worker = get_object_or_404(Worker, name=name)
-#     # return worker
-
-
 @api.get("/filterworker", response=List[WorkerSchema])
 def getFilterWorker(
     request,
@@ -56,7 +50,7 @@ def send_otp(request, payload: SendOTPSchema):
    otp = otp_gen()
    hashed = hashlib.sha256(otp.encode()).hexdigest()
    redis_client.setex(f"otp:{phone}", 600, hashed)
-   send_otp_sms(phone, otp)
+   sendOTP_SMS(otp=otp, recpient=phone)
    #print("OTP: ", otp)
    return {"status": True, "message": "OTP Sent successfully"}
 
