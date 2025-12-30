@@ -15,6 +15,8 @@ class Customer(models.Model):
         max_length=256,
         unique=True,
     )
+    def __str__(self):
+        return self.name
 
 
 class History(models.Model):
@@ -61,3 +63,5 @@ class Worker(models.Model):
     price = models.DecimalField(max_digits=11, decimal_places=3)
 
     description = models.CharField(max_length=200)
+    def __str__(self):
+        return f"{self.name}-{self.category}"
