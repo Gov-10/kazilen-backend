@@ -60,7 +60,7 @@ def verify_otp(request, payload: VerifyOTPSchema):
     stored = redis_client.get(key)
     if not stored:
         return {"success": False, "error": "OTP expired or invalid"}
-    input_hash = hashlib.sha256(data.otp.encode()).hexdigest()
+    input_hash = hashlib.sha256(payload.otp.encode()).hexdigest()
     if input_hash != stored :
         return {"success": False, "error": "Invalid OTP entered"}
     redis_client.delete(key)
