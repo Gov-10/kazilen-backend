@@ -64,4 +64,4 @@ def verify_otp(request, payload: VerifyOTPSchema):
     if input_hash != stored :
         return {"success": False, "error": "Invalid OTP entered"}
     redis_client.delete(key)
-    return {"success": True}
+    return {"success": True, "message": "OTP Verified successfully"}
