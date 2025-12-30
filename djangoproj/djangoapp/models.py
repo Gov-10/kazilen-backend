@@ -28,7 +28,7 @@ class History(models.Model):
     action = models.CharField(max_length=30)
     timestmp = models.DateTimeField(auto_now=True)
     def __str__(self):
-        return f"{self.customer.name}:{self.action}->{self.timestamp}"
+        return f"{self.customer.name}:{self.action}->{self.timestmp}"
 
 
 class Worker(models.Model):
