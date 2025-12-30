@@ -1,33 +1,31 @@
-from dotenv import load_dotenv
 import os
-import requests
+from dotenv import load_dotenv
+from twilio.rest import Client
 load_dotenv()
-def send_otp_sms(phone: str, otp: str):
-    url = ""
-    payload = {
-        "integrated_number": os.getenv("MSG91_WA_NUMBER"),
-        "content_type": "template",
-        "payload": {
-            "to": phone,
-            "type": "template",
-            "template": {
-                "name": "otp_template",
-                "language": {"code": "en"},
-                "components": [
-                    {
-                        "type": "body",
-                        "parameters": [
-                            {"type": "text", "text": otp}
-                        ]
-                    }
-                ]
-            }
-        }
-    }
-    headers = {
-        "authkey": os.getenv("MSG91_AUTH_KEY"),
-        "Content-Type": "application/json",
-    }
 
-    r = requests.post(url, json=payload, headers=headers, timeout=5)
-    r.raise_for_status()
+ACCOUNT_SID = os.getenv("ACCOUNT_SID")
+AUTH_TOKEN = os.getenv("AUTH_TOKEN")
+COMPANY_NUMBER = os.getenv("COMPANY_NUMBER")
+
+client = Client(ACCOUNT_SID, AUTH_TOKEN)
+
+def sendOTP_SMS(recpient, otp):
+    try:
+        client.messages.create(
+            body=f'your otp is {otp}',
+            from_=COMPANY_NUMBER,
+            to=f'{recpient}'
+            )
+    except:
+        print("error ho gaya ji")
+
+
+def sendOTP_WHATSAPP(recpient, otp):
+    try:
+        client.messages.create(
+            body=f'your otp is {otp}',
+            from_=f'whatsapp:{COMPANY_NUMBER}',
+            to=f'whatsapp{recpient}'
+            )
+    except:
+        print("error ho gaya ji")
