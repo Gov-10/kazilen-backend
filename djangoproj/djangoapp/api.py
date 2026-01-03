@@ -14,12 +14,12 @@ import os
 load_dotenv()
 api = NinjaAPI()
 
-#redis_client = Redis(
-#        host = os.getenv("REDIS_URL", 'localhost'), 
-#        port = int(os.getenv("REDIS_PORT", 6579)),
-#        password=os.getenv("REDIS_PASSWORD"),
-#        decode_responses=True
-#        )
+redis_client = Redis(
+        host = os.getenv("REDIS_URL", 'localhost'), 
+        port = int(os.getenv("REDIS_PORT", 6379)),
+        password=os.getenv("REDIS_PASSWORD"),
+        decode_responses=True
+        )
 
 redis_client = Redis(host='localhost', port=6379, decode_responses=True)
 
