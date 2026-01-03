@@ -21,7 +21,7 @@ api = NinjaAPI()
 #        decode_responses=True
 #        )
 
-redis_client = Redis(host='localhost', port=6579, decode_responses=True)
+redis_client = Redis(host='localhost', port=6379, decode_responses=True)
 
 # class workerFilter(FilterSchema):
 #     category: Optional[List[str]]
