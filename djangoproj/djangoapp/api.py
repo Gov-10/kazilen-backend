@@ -52,7 +52,7 @@ def send_otp(request, payload: SendOTPSchema):
    otp = otp_gen()
    hashed = hashlib.sha256(otp.encode()).hexdigest()
    redis_client.setex(f"otp:{phone}", 600, hashed)
-   sendOTP_SMS(otp=otp, recpient=phone)
+   sendOTP_WHATSAPP(otp=otp, recpient=phone)
    #print("OTP: ", otp)
    return {"status": True, "message": "OTP Sent successfully"}
 
