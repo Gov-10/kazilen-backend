@@ -25,7 +25,7 @@ def sendOTP_WHATSAPP(recpient, otp):
         client.messages.create(
             body=f'your otp is {otp}',
             from_=f'whatsapp:{COMPANY_NUMBER}',
-            to=f'whatsapp:+{recpient}'
+            to=f'whatsapp:{recpient}'
             )
     except:
         print("error ho gaya ji")
