@@ -11,9 +11,12 @@ from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
 from redis import Redis
 from dotenv import load_dotenv
 import os
+import logging
+
 load_dotenv()
 api = NinjaAPI()
-
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 redis_client = Redis(
         host = os.getenv("REDIS_URL", 'localhost'), 
         port = int(os.getenv("REDIS_PORT", 6379)),
@@ -47,10 +50,14 @@ def getFilterWorker(
 def send_otp(request, payload: SendOTPSchema):
    phone = payload.phone
    otp = otp_gen()
+   logger.info(f"OTP: {otp}")
    hashed = hashlib.sha256(otp.encode()).hexdigest()
+   logger.info(f"Hashed: {hashed}")
    redis_client.setex(f"otp:{phone}", 600, hashed)
    sendOTP_WHATSAPP(otp=otp, recpient=phone)
    #print("OTP: ", otp)
+   logger.info("STORED IN REDIS")
+   sendOTP_SMS(otp=otp, recpient=phone)
    return {"status": True, "message": "OTP Sent successfully"}
 
 @api.post("/verify-otp")
