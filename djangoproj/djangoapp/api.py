@@ -21,11 +21,8 @@ redis_client = Redis(
         decode_responses=True
         )
 
-redis_client = Redis(host='localhost', port=6379, decode_responses=True)
+#redis_client = Redis(host='localhost', port=6379, decode_responses=True)
 
-# class workerFilter(FilterSchema):
-#     category: Optional[List[str]]
-#     subcategory: Optional[List[str]]
 
 @api.get("/worker", response=List[WorkerSchema])
 def getAllWorker(request):
