@@ -1,8 +1,10 @@
 import uuid
 from django.db import models
+from django.contrib import admin
+
 
 def userDirPath(instance, fileName):
-    return f'user_{instance.uniqueID}/{fileName}'
+    return f'user_{instance.profile.uniqueID}/{fileName}'
 
 class Profile(models.Model):
     uniqueID = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
