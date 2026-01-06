@@ -28,6 +28,30 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+
+#!!==============================================================================
+#theese are local variables for local DB minio/ kazi1 is bucket
+AWS_ACCESS_KEY_ID = 'minioadmin'
+AWS_SECRET_ACCESS_KEY = 'minioadmin'
+AWS_STORAGE_BUCKET_NAME = 'kazi1'
+AWS_S3_ENDPOINT_URL = 'http://localhost:8888'
+AWS_S3_USE_SSL = False
+AWS_S3_VERIFY = False
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_FILE_OVERWRITE = False
+# Remove this part if really moving to real S3
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+#!!===============================================================================
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',
 ]
 
 MIDDLEWARE = [
