@@ -1,9 +1,9 @@
-from ninja import Router, Schema
+from ninja import Schema, NinjaAPI
 from typing import List
 from .models import Profile
 import uuid
 
-router = Router()
+api = NinjaAPI()
 
 class imageOUT(Schema):
     url: str
@@ -14,7 +14,11 @@ class profileOUT(Schema):
     name : str
     images : List[imageOUT]
 
-@router.get("/profile/{uniqueID}", response=profileOUT)
+@api.get("/profile/{uniqueID}", response=profileOUT)
 def get_profile(request, uniqueID: uuid.UUID):
     profile = Profile.objects.get(uniqueID=uniqueID)
     return profile
+
+@api.get("/ola", response= str)
+def ola(request):
+    return "ola"
