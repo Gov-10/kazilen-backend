@@ -39,6 +39,7 @@ AWS_S3_USE_SSL = False
 AWS_S3_VERIFY = False
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False
+AWS_QUERYSTRING_AUTH = True
 # Remove this part if really moving to real S3
 
 STORAGES = {
