@@ -12,7 +12,9 @@ from redis import Redis
 from dotenv import load_dotenv
 import os
 import logging
-
+import secrets
+from .auth import CustomAuth
+#Log statements that expose vital info shall be removed later. This project is currently not in production
 load_dotenv()
 api = NinjaAPI()
 logger = logging.getLogger(__name__)
@@ -69,5 +71,14 @@ def verify_otp(request, payload: VerifyOTPSchema):
     input_hash = hashlib.sha256(payload.otp.encode()).hexdigest()
     if input_hash != stored :
         return {"success": False, "error": "Invalid OTP entered"}
-    redis_client.delete(key)
-    return {"success": True, "message": "OTP Verified successfully"}
+    session_token = secrets.token_urlsafe(32)
+    logger.info(f"SESSION_TOKEN: {session_token}")
+    redis_client.setex(f"session:{session_token}", 86400, payload.phone)
+    logger.info("SESSION TOKEN STORED IN REDIS")
+    return {"success": True, "session": session_token}
+
+@api.get("/check", auth=CustomAuth())
+def protected_check(request):
+    phone = request.auth
+    return {"message" : f"Your phone number = {phone}"}
+
