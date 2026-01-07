@@ -14,7 +14,7 @@ import os
 import logging
 import secrets
 from .auth import CustomAuth
-
+#Log statements that expose vital info shall be removed later. This project is currently not in production
 load_dotenv()
 api = NinjaAPI()
 logger = logging.getLogger(__name__)
@@ -80,3 +80,4 @@ def verify_otp(request, payload: VerifyOTPSchema):
 def protected_check(request):
     phone = request.auth
     return {"message" : f"Your phone number = {phone}"}
+
