@@ -87,3 +87,9 @@ def get_profile(request):
     details = get_object_or_404(Customer, phoneNo=phone)
     return details
 
+@api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
+def get_history(request):
+    phone = request.auth
+    customer = get_object_or_404(Customer, phoneNo=phone)
+    details = History.objects.filter(customer=customer).order_by("-timestmp")
+    return details
