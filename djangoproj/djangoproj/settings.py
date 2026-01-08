@@ -25,6 +25,20 @@ SECRET_KEY = "django-insecure-agbj!s1(rkami$j)j$&94okc@2m&@)1l(3u39x46v=0nta(8v6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+#!!==============================================================================
+#theese are local variables for local DB minio/ kazi1 is bucket
+AWS_ACCESS_KEY_ID = 'minioadmin'
+AWS_SECRET_ACCESS_KEY = 'minioadmin'
+AWS_STORAGE_BUCKET_NAME = 'kazi1'
+AWS_S3_ENDPOINT_URL = 'http://localhost:8888'
+AWS_S3_USE_SSL = False
+AWS_S3_VERIFY = False
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_FILE_OVERWRITE = False
+AWS_QUERYSTRING_AUTH = True
+# Remove this part if really moving to real S3
+#!!===============================================================================
+
 ALLOWED_HOSTS = []
 
 
@@ -40,6 +54,7 @@ INSTALLED_APPS = [
     "ninja",
     "djangoapp",
     "phonenumber_field",
+    "storages",
 ]
 
 MIDDLEWARE = [
