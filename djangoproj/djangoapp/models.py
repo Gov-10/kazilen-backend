@@ -4,6 +4,8 @@ from django.utils import choices
 from phonenumber_field.modelfields import PhoneNumberField
 from multiselectfield import MultiSelectField
 import uuid
+
+from phonenumber_field.phonenumber import total_ordering
 class Customer(models.Model):
     name = models.CharField(
         max_length=100,
@@ -47,7 +49,7 @@ class Worker(models.Model):
         ("fixed", "Fixed Charges"),
         ("book", "Hourly pay")
         )
-    id = models.UUIDField(unique= True, default=uuid.uuid4)
+    id = models.UUIDField(unique= True, default=uuid.uuid4, primary_key=True)
     name = models.CharField(
         max_length=100,
     )
