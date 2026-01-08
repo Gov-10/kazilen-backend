@@ -9,7 +9,7 @@ def uploadToUUID(instance, filename):
     return os.path.join("images", str(instance.profileID), filename)
 
 class ProfileImage(models.Model):
-    profileID = models.IntegerField(unique=True)
+    profileID = models.IntegerField(db_index=True)
     file = models.ImageField(upload_to = uploadToUUID,
                              storage=storages["minio"])
     uploadedAT = models.DateTimeField(auto_now_add = True)
