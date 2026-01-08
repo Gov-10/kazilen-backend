@@ -81,3 +81,15 @@ def protected_check(request):
     phone = request.auth
     return {"message" : f"Your phone number = {phone}"}
 
+@api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
+def get_profile(request):
+    phone = request.auth
+    details = get_object_or_404(Customer, phoneNo=phone)
+    return details
+
+@api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
+def get_history(request):
+    phone = request.auth
+    customer = get_object_or_404(Customer, phoneNo=phone)
+    details = History.objects.filter(customer=customer).order_by("-timestmp")
+    return details
