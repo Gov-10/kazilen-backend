@@ -4,7 +4,7 @@ from typing import List, Optional
 from ninja import FilterSchema, NinjaAPI, Query, Schema
 from django.shortcuts import get_object_or_404
 from .models import Customer, Worker, History
-from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema
+from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema,CreateAccountSchema
 import hashlib
 from .utils.otp_generator import otp_gen
 from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
@@ -93,3 +93,10 @@ def get_history(request):
     customer = get_object_or_404(Customer, phoneNo=phone)
     details = History.objects.filter(customer=customer).order_by("-timestmp")
     return details
+
+@api.post("/create-account")
+def create_account(request, payload:CreateAccountSchema):
+    customer = Customer.objects.create(**payload.dict())
+    return {"message": "User created successfully", "name": customer.name}
+
+

@@ -4,7 +4,7 @@ from ninja import Field, ModelSchema, Schema
 from .models import Customer, Worker, History
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from pydantic import field_validator
-from datetime import datetime
+from datetime import datetime, date
 
 class CustomerSchema(Schema):
     name:str
@@ -12,6 +12,8 @@ class CustomerSchema(Schema):
     phoneNo:str
     email:str
     photo:Optional[str]=None
+    gender:str
+    dob:date
     @staticmethod
     def resolve_phoneNo(obj):
         return str(obj.phoneNo)
@@ -51,3 +53,12 @@ class SendOTPSchema(Schema):
 class VerifyOTPSchema(Schema):
     phone : str
     otp : str
+
+class CreateAccountSchema(Schema):
+    name: str
+    phoneNo : PhoneNumber
+    email : Optional[str] = None
+    address:str
+    gender : str
+    dob: date
+
