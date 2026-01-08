@@ -1,8 +1,7 @@
 from django.db.models import Q, QuerySet
 from typing_extensions import List
 from typing import List, Optional
-from ninja import FilterSchema, NinjaAPI, Query, Schema
-from django.shortcuts import get_object_or_404
+from ninja import FilterSchema, NinjaAPI, Query, Router, Schema
 from .models import Customer, Worker, History
 from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema
 import hashlib
@@ -16,7 +15,7 @@ import secrets
 from .auth import CustomAuth
 #Log statements that expose vital info shall be removed later. This project is currently not in production
 load_dotenv()
-api = NinjaAPI()
+api = Router()
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 redis_client = Redis(

@@ -17,9 +17,13 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-from djangoapp.api import api
+from djangoapp.api import api 
+from imageserver.api import router
+from ninja import NinjaAPI
+ninja = NinjaAPI()
 
+ninja.add_router('api/', api)
+ninja.add_router('image/', router)
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('api/', api.urls)
 ]
