@@ -80,3 +80,10 @@ def verify_otp(request, payload: VerifyOTPSchema):
 def protected_check(request):
     phone = request.auth
     return {"message" : f"Your phone number = {phone}"}
+
+@api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
+def get_profile(request):
+    phone = request.auth
+    details = get_object_or_404(Customer, phoneNo=phone)
+    return details
+
