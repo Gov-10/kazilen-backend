@@ -22,8 +22,9 @@ from imageserver.api import router
 from ninja import NinjaAPI
 ninja = NinjaAPI()
 
-ninja.add_router('api/', api)
-ninja.add_router('image/', router)
+ninja.add_router('/api/', api)
+ninja.add_router('/image/', router)
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("bakend/", ninja.urls)
 ]
