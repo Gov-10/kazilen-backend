@@ -16,6 +16,8 @@ from .auth import CustomAuth
 #Log statements that expose vital info shall be removed later. This project is currently not in production
 load_dotenv()
 api = Router()
+
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 redis_client = Redis(

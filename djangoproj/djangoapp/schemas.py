@@ -19,6 +19,7 @@ class CustomerSchema(Schema):
 class WorkerSchema(ModelSchema):
     subcategory: List[str]
     phoneNo: PhoneNumber
+    imageURL: str
     class Meta:
         model = Worker
         fields = "__all__"
