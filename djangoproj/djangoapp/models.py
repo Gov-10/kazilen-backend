@@ -45,12 +45,8 @@ class History(models.Model):
 class Worker(models.Model):
     JobProfiles = [
         ("vehicle", "mechanic"),
-        ("mechanic", "health"),
-        ("doctor", "carpenter"),
-        ("carpenter", "electrician"),
-        ("electrician", "home"),
-        ("home cleaning/services", "appliance"),
-        ("electronic device", "labour"),
+        ("carpenter", "wood work"),
+        ("electrician", "appliance"),
         ("manual", " labour")
     ]
     SubCategory = (
