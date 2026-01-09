@@ -1,8 +1,16 @@
 from django.db import models
-from django.db.models.fields import CharField
-from django.utils import choices
+import os
 from phonenumber_field.modelfields import PhoneNumberField
 from multiselectfield import MultiSelectField
+from django.core.files.storage import storages
+import uuid
+
+
+
+def upload_worker_image(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+    return os.path.join("workers", str(instance.id), filename)
 
 class Customer(models.Model):
     name = models.CharField(
@@ -50,6 +58,7 @@ class Worker(models.Model):
         ("fixed", "Fixed Charges"),
         ("book", "Hourly pay")
         )
+    id = models.UUIDField(unique= True, default=uuid.uuid4, primary_key=True, editable=False)
     name = models.CharField(
         max_length=100,
     )
@@ -61,6 +70,12 @@ class Worker(models.Model):
         max_length=30,
         choices=JobProfiles,
         default=JobProfiles[-1],
+    )
+    imageURL = models.ImageField(
+        upload_to=upload_worker_image, 
+        storage=storages["minio"],
+        null=False, 
+        blank=False
     )
     subcategory = MultiSelectField(choices=SubCategory, default=["consultant"], min_choices=1, max_length=20)
     rating = models.FloatField()

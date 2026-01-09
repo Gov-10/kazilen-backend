@@ -1,8 +1,7 @@
 from django.db.models import Q, QuerySet
 from typing_extensions import List
 from typing import List, Optional
-from ninja import FilterSchema, NinjaAPI, Query, Schema
-from django.shortcuts import get_object_or_404
+from ninja import FilterSchema, NinjaAPI, Query, Router, Schema
 from .models import Customer, Worker, History
 from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema,CreateAccountSchema
 import hashlib
@@ -14,21 +13,22 @@ import os
 import logging
 import secrets
 from .auth import CustomAuth
-
+#Log statements that expose vital info shall be removed later. This project is currently not in production
 load_dotenv()
-api = NinjaAPI()
+api = Router()
+
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 redis_client = Redis(
-        host = os.getenv("REDIS_URL"), 
-        port = int(os.getenv("REDIS_PORT")),
+        host = os.getenv("REDIS_URL", 'localhost'), 
+        port = int(os.getenv("REDIS_PORT", 6379)),
         password=os.getenv("REDIS_PASSWORD"),
         decode_responses=True
         )
 
-# class workerFilter(FilterSchema):
-#     category: Optional[List[str]]
-#     subcategory: Optional[List[str]]
+#redis_client = Redis(host='localhost', port=6379, decode_responses=True)
+
 
 @api.get("/worker", response=List[WorkerSchema])
 def getAllWorker(request):
@@ -57,6 +57,8 @@ def send_otp(request, payload: SendOTPSchema):
    hashed = hashlib.sha256(otp.encode()).hexdigest()
    logger.info(f"Hashed: {hashed}")
    redis_client.setex(f"otp:{phone}", 600, hashed)
+   sendOTP_WHATSAPP(otp=otp, recpient=phone)
+   #print("OTP: ", otp)
    logger.info("STORED IN REDIS")
    sendOTP_SMS(otp=otp, recpient=phone)
    return {"status": True, "message": "OTP Sent successfully"}
