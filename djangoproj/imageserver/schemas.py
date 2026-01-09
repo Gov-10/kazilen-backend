@@ -1,5 +1,6 @@
+from uuid import UUID
 from ninja import Schema
 
 class ImageResponse(Schema):
-    profileID: int
+    profileID: UUID
     image_url: str
