@@ -19,7 +19,7 @@ class CustomerSchema(Schema):
         return str(obj.phoneNo)
 
 class WorkerSchema(ModelSchema):
-    subcategory: List[str]
+#    subcategory: List[str]
     phoneNo: PhoneNumber
     imageURL: str
     class Meta:
