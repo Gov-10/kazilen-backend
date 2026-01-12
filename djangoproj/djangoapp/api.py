@@ -9,10 +9,12 @@ from .utils.otp_generator import otp_gen
 from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
 from redis import Redis
 from dotenv import load_dotenv
+from django.shortcuts import get_object_or_404
 import os
 import logging
 import secrets
 from .auth import CustomAuth
+
 #Log statements that expose vital info shall be removed later. This project is currently not in production
 load_dotenv()
 api = Router()
