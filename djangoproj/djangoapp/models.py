@@ -6,7 +6,6 @@ from django.core.files.storage import storages
 import uuid
 
 
-
 def upload_worker_image(instance, filename):
     ext = filename.split('.')[-1]
     filename = f"{uuid.uuid4()}.{ext}"
@@ -73,7 +72,10 @@ class Worker(models.Model):
         null=False, 
         blank=False
     )
-    subcategory = MultiSelectField(choices=SubCategory, default=["consultant"], min_choices=1, max_length=20)
+#    subcategory = MultiSelectField(choices=SubCategory, default=["consultant"], min_choices=1, max_length=20)
+    is_Consult = models.BooleanField(default=False)
+    is_Hourly = models.BooleanField(default=True)
+    is_Fixed = models.BooleanField(default=True)
     rating = models.FloatField()
 
     price = models.DecimalField(max_digits=11, decimal_places=3)
