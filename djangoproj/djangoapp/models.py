@@ -16,7 +16,6 @@ class Customer(models.Model):
         max_length=100,
         verbose_name="fullName",
     )
-    address = models.CharField(max_length=500)
     phoneNo = PhoneNumberField(unique=True)
     email = models.EmailField(
         max_length=256,
