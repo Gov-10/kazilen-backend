@@ -12,6 +12,12 @@ def upload_worker_image(instance, filename):
     return os.path.join("workers", str(instance.id), filename)
 
 class Customer(models.Model):
+    gender = [
+            ("M", "Male"),
+            ("F", "Female"),
+            ("O", "Others"),
+            ("N", "rather not say")
+            ]
     name = models.CharField(
         max_length=100,
         verbose_name="fullName",
@@ -21,7 +27,9 @@ class Customer(models.Model):
         max_length=256,
         unique=True,
     )
-    gender = models.CharField(max_length=100, null=True, blank=True)
+    gender = models.CharField(max_length=100, 
+                              choices=gender,
+                              default=gender[-0])
     dob = models.DateField(null=True, blank=True)
     
     def __str__(self):

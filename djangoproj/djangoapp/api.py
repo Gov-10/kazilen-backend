@@ -82,7 +82,7 @@ def verify_otp(request, payload: VerifyOTPSchema):
 
 @api.post("/check", response = checkPhone)
 def protected_check(request, phone:str):
-    yolo = get_object_or_404(Customer, phoneNo=f'+{phone}')
+    yolo = get_object_or_404(Customer, phoneNo=f'+91{request.body}')
     if yolo:
         return {"exists": True, "userID": str(yolo.id)}
     else:
@@ -93,7 +93,7 @@ def get_profile(request):
     phone = request.auth
     if not phone:
         return {"error": "User does not exist", "status": False}
-    details = get_object_or_404(Customer, phoneNo=f"+{phone}")
+    details = get_object_or_404(Customer, phoneNo=f"+91{phone}")
     return details
 
 @api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
@@ -108,6 +108,6 @@ def get_history(request):
 @api.post("/create-account")
 def create_account(request, payload:CreateAccountSchema):
     customer = Customer.objects.create(**payload.dict())
-    return {"message": "User created successfully", "name": customer.name}
+    return {"id": customer.id, "phoneNo": customer.phoneNo}
 
 
