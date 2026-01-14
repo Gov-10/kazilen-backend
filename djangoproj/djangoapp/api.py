@@ -3,7 +3,7 @@ from typing_extensions import List
 from typing import List, Optional
 from ninja import FilterSchema, NinjaAPI, Query, Router, Schema
 from .models import Customer, Worker, History
-from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema,CreateAccountSchema
+from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema, CreateAccountSchema, checkPhone
 import hashlib
 from .utils.otp_generator import otp_gen
 from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
@@ -80,19 +80,20 @@ def verify_otp(request, payload: VerifyOTPSchema):
     logger.info("SESSION TOKEN STORED IN REDIS")
     return {"success": True, "session": session_token}
 
-@api.get("/check", auth=CustomAuth())
-def protected_check(request):
-    phone = request.auth
-    if not phone:
-        return {"error": "User does not exist", "status": False}
-    return {"message" : f"Your phone number = {phone}"}
+@api.post("/check", response = checkPhone)
+def protected_check(request, phone:str):
+    yolo = get_object_or_404(Customer, phoneNo=f'+{phone}')
+    if yolo:
+        return {"exists": True, "userID": str(yolo.id)}
+    else:
+        return {"exists": False, "userID": None}
 
 @api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
 def get_profile(request):
     phone = request.auth
     if not phone:
         return {"error": "User does not exist", "status": False}
-    details = get_object_or_404(Customer, phoneNo=phone)
+    details = get_object_or_404(Customer, phoneNo=f"+{phone}")
     return details
 
 @api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
