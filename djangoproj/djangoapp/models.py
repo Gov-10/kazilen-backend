@@ -84,7 +84,8 @@ class Worker(models.Model):
     is_Hourly = models.BooleanField(default=True)
     is_Fixed = models.BooleanField(default=True)
     rating = models.FloatField()
-
+    dob = models.DateField()
+    gender = models.CharField()
     price = models.DecimalField(max_digits=11, decimal_places=3)
 
     description = models.CharField(max_length=200)

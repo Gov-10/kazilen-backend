@@ -69,3 +69,10 @@ class CreateAccountSchema(Schema):
     gender : str
     dob: date
 
+class CreateWorkerSchema(Schema):
+    phoneNo: PhoneNumber
+    name: str
+    dob: date
+    gender: str
+    category: str
+
