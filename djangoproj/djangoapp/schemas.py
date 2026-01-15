@@ -6,7 +6,13 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 from pydantic import field_validator
 from datetime import datetime, date
 
+
+class checkPhone(Schema):
+    exists : bool
+    userID : Optional[str] 
+
 class CustomerSchema(Schema):
+    id:int
     name:str
     address:str
     phoneNo:str
@@ -19,8 +25,9 @@ class CustomerSchema(Schema):
         return str(obj.phoneNo)
 
 class WorkerSchema(ModelSchema):
-    subcategory: List[str]
+#    subcategory: List[str]
     phoneNo: PhoneNumber
+    imageURL: str
     class Meta:
         model = Worker
         fields = "__all__"

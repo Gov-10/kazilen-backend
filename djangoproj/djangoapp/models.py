@@ -1,21 +1,35 @@
 from django.db import models
-from django.db.models.fields import CharField
-from django.utils import choices
+import os
 from phonenumber_field.modelfields import PhoneNumberField
 from multiselectfield import MultiSelectField
+from django.core.files.storage import storages
+import uuid
+
+
+def upload_worker_image(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+    return os.path.join("workers", str(instance.id), filename)
 
 class Customer(models.Model):
+    gender = [
+            ("M", "Male"),
+            ("F", "Female"),
+            ("O", "Others"),
+            ("N", "rather not say")
+            ]
     name = models.CharField(
         max_length=100,
         verbose_name="fullName",
     )
-    address = models.CharField(max_length=500)
     phoneNo = PhoneNumberField(unique=True)
     email = models.EmailField(
         max_length=256,
         unique=True,
     )
-    gender = models.CharField(max_length=100, null=True, blank=True)
+    gender = models.CharField(max_length=100, 
+                              choices=gender,
+                              default=gender[-0])
     dob = models.DateField(null=True, blank=True)
     
     def __str__(self):
@@ -37,12 +51,8 @@ class History(models.Model):
 class Worker(models.Model):
     JobProfiles = [
         ("vehicle", "mechanic"),
-        ("mechanic", "health"),
-        ("doctor", "carpenter"),
-        ("carpenter", "electrician"),
-        ("electrician", "home"),
-        ("home cleaning/services", "appliance"),
-        ("electronic device", "labour"),
+        ("carpenter", "wood work"),
+        ("electrician", "appliance"),
         ("manual", " labour")
     ]
     SubCategory = (
@@ -50,6 +60,7 @@ class Worker(models.Model):
         ("fixed", "Fixed Charges"),
         ("book", "Hourly pay")
         )
+    id = models.UUIDField(unique= True, default=uuid.uuid4, primary_key=True, editable=False)
     name = models.CharField(
         max_length=100,
     )
@@ -62,7 +73,16 @@ class Worker(models.Model):
         choices=JobProfiles,
         default=JobProfiles[-1],
     )
-    subcategory = MultiSelectField(choices=SubCategory, default=["consultant"], min_choices=1, max_length=20)
+    imageURL = models.ImageField(
+        upload_to=upload_worker_image, 
+        storage=storages["minio"],
+        null=False, 
+        blank=False
+    )
+#    subcategory = MultiSelectField(choices=SubCategory, default=["consultant"], min_choices=1, max_length=20)
+    is_Consult = models.BooleanField(default=False)
+    is_Hourly = models.BooleanField(default=True)
+    is_Fixed = models.BooleanField(default=True)
     rating = models.FloatField()
 
     price = models.DecimalField(max_digits=11, decimal_places=3)

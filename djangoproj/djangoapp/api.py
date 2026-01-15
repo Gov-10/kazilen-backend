@@ -1,34 +1,36 @@
 from django.db.models import Q, QuerySet
 from typing_extensions import List
 from typing import List, Optional
-from ninja import FilterSchema, NinjaAPI, Query, Schema
-from django.shortcuts import get_object_or_404
+from ninja import FilterSchema, NinjaAPI, Query, Router, Schema
 from .models import Customer, Worker, History
-from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema,CreateAccountSchema
+from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema, CreateAccountSchema, checkPhone
 import hashlib
 from .utils.otp_generator import otp_gen
 from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
 from redis import Redis
 from dotenv import load_dotenv
+from django.shortcuts import get_object_or_404
 import os
 import logging
 import secrets
 from .auth import CustomAuth
 
+#Log statements that expose vital info shall be removed later. This project is currently not in production
 load_dotenv()
-api = NinjaAPI()
+api = Router()
+
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 redis_client = Redis(
-        host = os.getenv("REDIS_URL"), 
-        port = int(os.getenv("REDIS_PORT")),
+        host = os.getenv("REDIS_URL", 'localhost'), 
+        port = int(os.getenv("REDIS_PORT", 6379)),
         password=os.getenv("REDIS_PASSWORD"),
         decode_responses=True
         )
 
-# class workerFilter(FilterSchema):
-#     category: Optional[List[str]]
-#     subcategory: Optional[List[str]]
+#redis_client = Redis(host='localhost', port=6379, decode_responses=True)
+
 
 @api.get("/worker", response=List[WorkerSchema])
 def getAllWorker(request):
@@ -57,6 +59,8 @@ def send_otp(request, payload: SendOTPSchema):
    hashed = hashlib.sha256(otp.encode()).hexdigest()
    logger.info(f"Hashed: {hashed}")
    redis_client.setex(f"otp:{phone}", 600, hashed)
+   sendOTP_WHATSAPP(otp=otp, recpient=phone)
+   #print("OTP: ", otp)
    logger.info("STORED IN REDIS")
    sendOTP_SMS(otp=otp, recpient=phone)
    return {"status": True, "message": "OTP Sent successfully"}
@@ -76,19 +80,20 @@ def verify_otp(request, payload: VerifyOTPSchema):
     logger.info("SESSION TOKEN STORED IN REDIS")
     return {"success": True, "session": session_token}
 
-@api.get("/check", auth=CustomAuth())
-def protected_check(request):
-    phone = request.auth
-    if not phone:
-        return {"error": "User does not exist", "status": False}
-    return {"message" : f"Your phone number = {phone}"}
+@api.post("/check", response = checkPhone)
+def protected_check(request, phone:str):
+    yolo = get_object_or_404(Customer, phoneNo=f'+91{request.body}')
+    if yolo:
+        return {"exists": True, "userID": str(yolo.id)}
+    else:
+        return {"exists": False, "userID": None}
 
 @api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
 def get_profile(request):
     phone = request.auth
     if not phone:
         return {"error": "User does not exist", "status": False}
-    details = get_object_or_404(Customer, phoneNo=phone)
+    details = get_object_or_404(Customer, phoneNo=f"+91{phone}")
     return details
 
 @api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
@@ -103,6 +108,6 @@ def get_history(request):
 @api.post("/create-account")
 def create_account(request, payload:CreateAccountSchema):
     customer = Customer.objects.create(**payload.dict())
-    return {"message": "User created successfully", "name": customer.name}
+    return {"id": customer.id, "phoneNo": customer.phoneNo}
 
 
