@@ -4,7 +4,7 @@ from typing import List, Optional
 from ninja import FilterSchema, NinjaAPI, Query, Schema
 from django.shortcuts import get_object_or_404
 from .models import Customer, Worker, History
-from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema,CreateAccountSchema
+from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema, VerifyOTPSchema,CreateAccountSchema, CreateWorkerSchema
 import hashlib
 from .utils.otp_generator import otp_gen
 from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
