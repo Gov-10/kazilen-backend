@@ -65,3 +65,5 @@ zope.interface==8.1
 whitenoise
 gunicorn
 uvicorn
+boto3
+Pillow

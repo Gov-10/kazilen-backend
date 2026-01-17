@@ -14,7 +14,7 @@ class checkPhone(Schema):
 class CustomerSchema(Schema):
     id:int
     name:str
-    address:str
+    address:Optional[str]= None
     phoneNo:str
     email:str
     photo:Optional[str]=None
@@ -65,7 +65,6 @@ class CreateAccountSchema(Schema):
     name: str
     phoneNo : PhoneNumber
     email : Optional[str] = None
-    address:str
     gender : str
     dob: date
 
