@@ -76,7 +76,7 @@ def verify_otp(request, payload: VerifyOTPSchema):
     logger.info("SESSION TOKEN STORED IN REDIS")
     return {"success": True, "session": session_token}
 
-@api.get("/check", auth=CustomAuth())
+@api.post("/check", auth=CustomAuth())
 def protected_check(request):
     phone = request.auth
     if not phone:
