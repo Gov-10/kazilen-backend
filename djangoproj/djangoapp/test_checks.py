@@ -8,3 +8,11 @@ def test_db():
     resp = client.get("/api/db_health/")
     assert resp.status_code==200
     assert resp.json() == {"status": "DB is up"}
+
+
+@pytest.mark.django_db
+def test_live():
+    client= Client()
+    resp = client.get("/api/live_check/")
+    assert resp.status_code==200
+    assert resp.json()=={"status":"LIVE"}

@@ -129,3 +129,6 @@ def db_check(request):
         print(f"DB ERROR: {e}")  #testing purposes only
         return {"status" : "DB is down"}
 
+@api.get("/live_check")
+def chek(request):
+    return {"status":"LIVE"}
