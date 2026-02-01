@@ -14,6 +14,9 @@ import os
 import logging
 import secrets
 from .auth import CustomAuth
+from django.db import connections
+from django.db.utils import OperationalError
+db_conn =connections["default"]  #will change once we migrate to neon
 
 load_dotenv()
 api = NinjaAPI()
@@ -115,9 +118,14 @@ def create_worker(request, payload:CreateWorkerSchema):
                category=payload.category
             )
     return {"message": f"Hello, {worker.name}", "status": True}
-    
-    
-    
 
-
+@api.get("/db_health")
+def db_check(request):
+    try:
+        with db_conn.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            return {"status": "DB is up"}
+    except OperationalError as e:
+        print(f"DB ERROR: {e}")  #testing purposes only
+        return {"status" : "DB is down"}
 

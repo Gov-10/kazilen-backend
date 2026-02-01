@@ -19,4 +19,5 @@ twilio
 django-multiselectfield
 pydantic-extra-types
 channels
-
+pytest
+pytest-django
