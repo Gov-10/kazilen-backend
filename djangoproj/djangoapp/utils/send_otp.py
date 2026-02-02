@@ -11,6 +11,7 @@ client = Client(ACCOUNT_SID, AUTH_TOKEN)
 
 def sendOTP_SMS(recpient, otp):
     try:
+        print(recpient)
         client.messages.create(
             body=f'your otp is {otp}',
             from_=COMPANY_NUMBER,
