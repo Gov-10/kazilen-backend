@@ -1,5 +1,3 @@
-from datetime import date
-from posixpath import exists
 from django.db.models import Q, QuerySet
 from typing_extensions import List
 from typing import List, Optional
@@ -81,19 +79,12 @@ def verify_otp(request, payload: VerifyOTPSchema):
     logger.info("SESSION TOKEN STORED IN REDIS")
     return {"success": True, "session": session_token}
 
-@api.post("/check_secure", auth=CustomAuth())
+@api.get("/check", auth=CustomAuth())
 def protected_check(request):
     phone = request.auth
     if not phone:
         return {"error": "User does not exist", "status": False}
     return {"message" : f"Your phone number = {phone}"}
-
-
-@api.post('/check')
-def unprotected_check(request, data: str):
-    valid_phone = '+91'+data
-    exists = Customer.objects.filter(phoneNo=valid_phone)
-    return {"exists": exists.exists()}
 
 @api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
 def get_profile(request):
@@ -119,12 +110,16 @@ def create_account(request, payload:CreateAccountSchema):
 
 @api.post("/create-worker")
 def create_worker(request, payload:CreateWorkerSchema):
+    city =payload.location
+    if city.lower() != "nagpur":
+        return {"message": "Sorry, we currently only serve Nagpur"}
     worker = Worker.objects.create(
                name=payload.name,
                phoneNo=payload.phoneNo,
                dob=payload.dob,
                gender=payload.gender,
-               category=payload.category
+               category=payload.category,
+               location=city
             )
     return {"message": f"Hello, {worker.name}", "status": True}
 
