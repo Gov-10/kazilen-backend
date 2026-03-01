@@ -49,12 +49,6 @@ class Worker(models.Model):
         ("fixed", "Fixed Charges"),
         ("book", "Hourly pay")
         )
-    activity = (
-        ("active", "Worker is active"),
-        ("offline", "Worker is offline"),
-        ("Working", "Worker is busy")
-            )
-    id = models.UUIDField(unique= True, default=uuid.uuid4, primary_key=True, editable=False)
     name = models.CharField(
         max_length=100,
     )
