@@ -77,7 +77,7 @@ class Worker(models.Model):
     gender = models.CharField(null=True, blank=True)
     price = models.DecimalField(max_digits=11, decimal_places=3, default=0)
     location = models.CharField(null=True, default=True)
-
+    is_Live=models.BooleanField(default=False)
     description = models.CharField(max_length=200, blank=True, null=True)
     def __str__(self):
         return f"{self.name}-{self.category}"

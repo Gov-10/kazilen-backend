@@ -32,7 +32,7 @@ redis_client = Redis(
 # class workerFilter(FilterSchema):
 #     category: Optional[List[str]]
 #     subcategory: Optional[List[str]]
-
+#TODO: Websockets
 @api.get("/worker", response=List[WorkerSchema])
 def getAllWorker(request):
     return Worker.objects.all()
