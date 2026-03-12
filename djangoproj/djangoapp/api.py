@@ -8,6 +8,7 @@ from .schemas import CustomerSchema, WorkerSchema, HistorySchema, SendOTPSchema,
 import hashlib
 from .utils.otp_generator import otp_gen
 from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
+from .utils.status_change import worker_update
 from redis import Redis
 from dotenv import load_dotenv
 import os
@@ -136,3 +137,12 @@ def db_check(request):
 @api.get("/live_check")
 def chek(request):
     return {"status":"LIVE"}
+
+@api.post("/worker/update-status")
+def upda(request, worker_id:str, status:str):
+    worker = get_object_or_404(Worker, id=worker_id)
+    worker.is_Live=status
+    worker.save()
+    worker_update(worker)
+    return {"status": True}
+
