@@ -49,6 +49,11 @@ class Worker(models.Model):
         ("fixed", "Fixed Charges"),
         ("book", "Hourly pay")
         )
+    activity = (
+        ("active", "Worker is active"),
+        ("offline", "Worker is offline"),
+        ("Working", "Worker is busy")
+            )
     id = models.UUIDField(unique= True, default=uuid.uuid4, primary_key=True, editable=False)
     name = models.CharField(
         max_length=100,
@@ -77,7 +82,7 @@ class Worker(models.Model):
     gender = models.CharField(null=True, blank=True)
     price = models.DecimalField(max_digits=11, decimal_places=3, default=0)
     location = models.CharField(null=True, default=True)
-    is_Live=models.BooleanField(default=False)
+    is_Live=models.CharField(max_length=30,choices=activity,default=activity[0])
     description = models.CharField(max_length=200, blank=True, null=True)
     def __str__(self):
         return f"{self.name}-{self.category}"
