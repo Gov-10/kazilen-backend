@@ -132,21 +132,6 @@ def create_account(request, payload: CreateAccountSchema):
     return {"message": "User created successfully", "name": customer.name}
 
 
-@api.post("/create-worker")
-def create_worker(request, payload:CreateWorkerSchema):
-    city =payload.location
-    if city.lower() != "nagpur":
-        return {"message": "Sorry, we currently only serve Nagpur"}
-    worker = Worker.objects.create(
-               name=payload.name,
-               phoneNo=payload.phoneNo,
-               dob=payload.dob,
-               gender=payload.gender,
-               category=payload.category,
-               location=city
-            )
-    return {"message": f"Hello, {worker.name}", "status": True}
-
 
 @api.get("/db_health")
 def db_check(request):
