@@ -41,14 +41,14 @@ subcategories = [
         "fan-install",
         "fan-repair",
         "light",
-        "wiring",
+        "home-wiring",
         "switch-install",
         "switch-mcb",
         "switch-repair"
         "invereter-install",
-        "invereter-maintenance",
+        "invereter-maintainance",
         "cooler-repair",
-        "motor-winding",
+        "motor-rewinding",
     ]
 def initialize_items():
     new_data = {}
