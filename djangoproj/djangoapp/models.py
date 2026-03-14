@@ -87,12 +87,11 @@ class Worker(models.Model):
     dob = models.DateField(null=True, blank=True)
     gender = models.CharField(choices=gender, default=gender[-1])
 
-    rates = models.JSONField(default=dict, null=True, blank=True, editable=True)
 
     location = models.CharField(null=True, default="nagpur", editable=True)
 
     description = models.CharField(max_length=200, blank=True, null=True, editable=True)
-
+    categories = models.CharField(default='electrician')
     sub_categories = models.JSONField(default=initialize_items, editable=True)
 
     

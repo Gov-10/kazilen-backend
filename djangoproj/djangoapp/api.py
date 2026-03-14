@@ -11,8 +11,9 @@ from .schemas import (
     SendOTPSchema,
     VerifyOTPSchema,
     CreateAccountSchema,
-    CreateWorkerSchema,
+    FilterWorkerSchema,
 )
+
 import hashlib
 from .utils.otp_generator import otp_gen
 from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP

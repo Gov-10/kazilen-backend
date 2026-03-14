@@ -27,16 +27,21 @@ class CustomerSchema(Schema):
 
 class WorkerSchema(ModelSchema):
 #    subcategory: List[str]
-    phoneNo: str 
+    phoneNo: PhoneNumber
     imageURL: str
     class Meta:
         model = Worker
         fields = "__all__"
+    
     @staticmethod
     def resolve_phoneNo(obj):
         if not obj.phoneNo:
             return None
         return str(obj.phoneNo)
+
+class FilterWorkerSchema(Schema):
+    phoneNo: PhoneNumber
+
 
 
 class HistorySchema(Schema):

@@ -22,7 +22,6 @@ from djangoapp.schemas import (
     HistorySchema,
     SendOTPSchema,
     VerifyOTPSchema,
-    CreateWorkerSchema,
     WorkerSchema,
 )
 
@@ -70,6 +69,7 @@ def verify_otp(request, payload: VerifyOTPSchema):
     logger.info("SESSION TOKEN STORED IN REDIS")
     return {"success": True, "session": session_token}
 
+
 @api.get("/check", auth=CustomAuth())
 def protected_check(request):
     phone = request.auth
@@ -110,20 +110,19 @@ def get_history(request):
     details = History.objects.filter(customer=customer).order_by("-timestmp")
     return details
 
-
-@api.post("/create-worker")
-def create_worker(request, payload:CreateWorkerSchema):
-    city =payload.location
+    # @api.post("/create-worker")
+    # def create_worker(request, payload:CreateWorkerSchema):
+    city = payload.location
     if city.lower() != "nagpur":
         return {"message": "Sorry, we currently only serve Nagpur"}
     worker = Worker.objects.create(
-               name=payload.name,
-               phoneNo=payload.phoneNo,
-               dob=payload.dob,
-               gender=payload.gender,
-               category=payload.category,
-               location=city
-            )
+        name=payload.name,
+        phoneNo=payload.phoneNo,
+        dob=payload.dob,
+        gender=payload.gender,
+        category=payload.category,
+        location=city,
+    )
     return {"message": f"Hello, {worker.name}", "status": True}
 
 
@@ -142,13 +141,15 @@ def db_check(request):
 class unporc_profile(Schema):
     user_id: str
 
+
 @api.post("/get_user_profile")
 def unporc_get_profile(request, unporc_profile):
     user_id = request.user_id
-    user = get_object_or_404(Customer, userID= user_id)
+    user = get_object_or_404(Customer, userID=user_id)
 
-#@api.post("/get_user_profile", response=CustomerSchema)
-#def unporc_get_profile(request, data: unporc_profile):
+
+# @api.post("/get_user_profile", response=CustomerSchema)
+# def unporc_get_profile(request, data: unporc_profile):
 #    user_id = data.user_id
 #    user = get_object_or_404(Customer, id=user_id)
 #    return user
