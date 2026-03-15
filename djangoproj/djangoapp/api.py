@@ -11,7 +11,6 @@ from .schemas import (
     SendOTPSchema,
     VerifyOTPSchema,
     CreateAccountSchema,
-    FilterWorkerSchema,
 )
 
 import hashlib
