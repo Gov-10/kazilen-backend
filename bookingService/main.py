@@ -23,11 +23,11 @@ def start_pin(payload: CustomerSchema):
     start_otp = otp_gene()
     hashed = hashlib.sha256(start_otp.encode()).hexdigest()
     redis_client.setex(f"start_otp:{customer_phone}:{worker_phone}", 86400, hashed)
-    #TODO: Change the is_Live status of worker
     return {"startPin": start_otp}
 
 @app.post("/confirm-start")
 def confirmKaro(payload:WorkerSchema):
+    #TODO: DB status updation and auth
     start_otp=payload.otp
     customer_phone=payload.customer_phone
     worker_phone=payload.worker_phone
@@ -40,6 +40,7 @@ def confirmKaro(payload:WorkerSchema):
 
 @app.post("/confirm-end")
 def confirmEnd(payload:WorkerSchema):
+    #TODO:DB status updation and auth 
     customer_phone=payload.customer_phone
     worker_phone=payload.worker_phone
     end_otp=payload.otp
