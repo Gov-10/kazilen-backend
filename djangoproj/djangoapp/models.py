@@ -26,10 +26,9 @@ class Customer(models.Model):
     gender = models.CharField(max_length=100, choices=gender, default=gender[-0])
     dob = models.DateField(null=True, blank=True)
 
-    is_working = models.BooleanField(default=False)
+    work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
     is_online = models.BooleanField(default=False)
 
-    work_id = models.UUIDField(null=True)
 
     def __str__(self):
         return f"id : {self.id}"

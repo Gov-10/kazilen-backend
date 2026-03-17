@@ -133,6 +133,11 @@ def create_account(request, payload: CreateAccountSchema):
 
 
 
+@api.post('/book', auth=CustomAuth())
+def bookWorker(request):
+    pass
+
+
 @api.get("/db_health")
 def db_check(request):
     try:
