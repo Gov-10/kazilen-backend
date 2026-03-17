@@ -4,6 +4,7 @@ from redis import Redis
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from schemas import CustomerSchema, WorkerSchema
 load_dotenv()
 app = FastAPI()
 
@@ -15,7 +16,7 @@ redis_client =Redis(
         )
 
 #TODO: Common Auth lagado
-@app.get("/start-pin")
+@app.post("/start-pin")
 def start_pin(payload: CustomerSchema):
     customer_phone=payload.customer_phone
     worker_phone=payload.worker_phone
@@ -25,8 +26,32 @@ def start_pin(payload: CustomerSchema):
     #TODO: Change the is_Live status of worker
     return {"startPin": start_otp}
 
+@app.post("/confirm-start")
+def confirmKaro(payload:WorkerSchema):
+    start_otp=payload.otp
+    customer_phone=payload.customer_phone
+    worker_phone=payload.worker_phone
+    key=f"start_otp:{customer_phone}:{worker_phone}"
+    otpRetr= redis_client.get(key)
+    if otpRetr==start_otp:
+        return {"message": "Pin matched successfully"}
+    else:
+        return {"message": "Pin did not match"}
+
+@app.post("/confirm-end")
+def confirmEnd(payload:WorkerSchema):
+    customer_phone=payload.customer_phone
+    worker_phone=payload.worker_phone
+    end_otp=payload.otp
+    key=f"end_otp:{customer_phone}:{worker_phone}"
+    otpRetr=redis_client.get(key)
+    if otpRetr==end_otp:
+        return {"message": "Work completed successfully"}
+    else:
+        return {"message": "Pin did not match"}
+
 #TODO: Common Auth lagado
-@app.get("/end-pin")
+@app.post("/end-pin")
 def end_pin(payload: CustomerSchema):
     customer_phone=payload.customer_name
     worker_phone=payload.worker_phone
@@ -38,10 +63,7 @@ def end_pin(payload: CustomerSchema):
         redis_client.setex(f"end_otp:{customer_phone}:{worker_phone}", 86400, hashed)
         return {"endPin": end_otp}
     else:
-        raise HTTPException(status_code=404, detail="No such job exists")
-
-    
-
+        raise HTTPException(status_code=404, detail="No such job exists") 
 
 
 
