@@ -34,7 +34,7 @@ def confirmKaro(payload:WorkerSchema):
     key=f"start_otp:{customer_phone}:{worker_phone}"
     otpRetr= redis_client.get(key)
     if otpRetr==start_otp:
-        return {"message": "Pin matched successfully"}
+        return {"message": "Pin matched successfully"}   
     else:
         return {"message": "Pin did not match"}
 
