@@ -25,6 +25,8 @@ from djangoapp.schemas import (
     WorkerSchema,
 )
 
+from .schemas import phonePayload
+
 db_conn = connections["default"]  # will change once we migrate to neon
 
 load_dotenv()
@@ -70,7 +72,7 @@ def verify_otp(request, payload: VerifyOTPSchema):
     return {"success": True, "session": session_token}
 
 
-@api.get("/check", auth=CustomAuth())
+@api.post("/checkproc", auth=CustomAuth())
 def protected_check(request):
     phone = request.auth
     if not phone:
@@ -78,12 +80,8 @@ def protected_check(request):
     return {"message": f"Your phone number = {phone}"}
 
 
-class check_phoneNo(Schema):
-    phone: str
-
-
 @api.post("/check", response={200: WorkerSchema, 404: dict})
-def unprotected_check(request, data: check_phoneNo):
+def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
     exists = Worker.objects.filter(phoneNo=valid_phone).first()
     if exists:
@@ -110,18 +108,16 @@ def get_history(request):
     details = History.objects.filter(customer=customer).order_by("-timestmp")
     return details
 
-    # @api.post("/create-worker")
-    # def create_worker(request, payload:CreateWorkerSchema):
-    city = payload.location
-    if city.lower() != "nagpur":
-        return {"message": "Sorry, we currently only serve Nagpur"}
+
+@api.post("/create-worker", auth=CustomAuth())
+def create_worker(request, payload: CreateWorkerSchema):
     worker = Worker.objects.create(
         name=payload.name,
         phoneNo=payload.phoneNo,
         dob=payload.dob,
         gender=payload.gender,
         category=payload.category,
-        location=city,
+        address=payload.location,
     )
     return {"message": f"Hello, {worker.name}", "status": True}
 
@@ -146,10 +142,3 @@ class unporc_profile(Schema):
 def unporc_get_profile(request, unporc_profile):
     user_id = request.user_id
     user = get_object_or_404(Customer, userID=user_id)
-
-
-# @api.post("/get_user_profile", response=CustomerSchema)
-# def unporc_get_profile(request, data: unporc_profile):
-#    user_id = data.user_id
-#    user = get_object_or_404(Customer, id=user_id)
-#    return user

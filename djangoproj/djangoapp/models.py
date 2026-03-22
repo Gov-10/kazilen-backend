@@ -87,7 +87,7 @@ class Worker(models.Model):
     gender = models.CharField(choices=gender, default=gender[-1])
 
 
-    location = models.CharField(null=True, default="nagpur", editable=True)
+    location = models.CharField(null=True, default="", editable=True)
 
     description = models.CharField(max_length=200, blank=True, null=True, editable=True)
     categories = models.CharField(default='electrician')
