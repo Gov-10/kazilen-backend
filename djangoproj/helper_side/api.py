@@ -25,7 +25,7 @@ from djangoapp.schemas import (
     WorkerSchema,
 )
 
-from .schemas import phonePayload
+from .schemas import phonePayload, CreateWorkerSchema
 
 db_conn = connections["default"]  # will change once we migrate to neon
 
