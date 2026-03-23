@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -57,11 +58,10 @@ STORAGES = {
 ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SECURE = True
-
 
 
 INSTALLED_APPS = [
@@ -122,25 +122,25 @@ ASGI_APPLICATION = "djangoproj.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',
-        'USER': 'neondb_owner',
-        'PASSWORD': os.getenv("NEON_PASSWORD"),
-        'HOST': os.getenv("NEON_HOST"),
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        }
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+# DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': 'neondb',
+#        'USER': 'neondb_owner',
+#        'PASSWORD': os.getenv("NEON_PASSWORD"),
+#        'HOST': os.getenv("NEON_HOST"),
+#        'PORT': '5432',
+#        'OPTIONS': {
+#            'sslmode': 'require',
+#        }
+#    }
+##}
 
 
 # Password validation
