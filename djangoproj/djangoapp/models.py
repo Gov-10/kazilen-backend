@@ -7,17 +7,13 @@ import uuid
 
 
 def upload_worker_image(instance, filename):
-    ext = filename.split('.')[-1]
+    ext = filename.split(".")[-1]
     filename = f"{uuid.uuid4()}.{ext}"
     return os.path.join("workers", str(instance.id), filename)
 
+
 class Customer(models.Model):
-    gender = [
-            ("M", "Male"),
-            ("F", "Female"),
-            ("O", "Others"),
-            ("N", "rather not say")
-            ]
+    gender = [("M", "Male"), ("F", "Female"), ("O", "Others"), ("N", "rather not say")]
     name = models.CharField(
         max_length=100,
         verbose_name="fullName",
@@ -27,34 +23,44 @@ class Customer(models.Model):
         max_length=256,
         unique=True,
     )
-    gender = models.CharField(max_length=100, 
-                              choices=gender,
-                              default=gender[-0])
+    gender = models.CharField(max_length=100, choices=gender, default=gender[-0])
     dob = models.DateField(null=True, blank=True)
-    
+
+    work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
+    is_online = models.BooleanField(default=False)
+
+
     def __str__(self):
-        return self.name
+        return f"id : {self.id}"
 
 
+subcategories = [
+        "consult",
+        "hourly",
+        "fan-install",
+        "fan-repair",
+        "light",
+        "home-wiring",
+        "switch-install",
+        "switch-mcb",
+        "switch-repair"
+        "invereter-install",
+        "invereter-maintainance",
+        "cooler-repair",
+        "motor-rewinding",
+    ]
+def initialize_items():
+    new_data = {}
+    for cate in subcategories:
+        new_data[cate] = {
+            "visible": False,
+            "price": 120,
+        }
+    return new_data
 
 class Worker(models.Model):
-    JobProfiles = [
-        ("vehicle", "mechanic"),
-        ("carpenter", "wood work"),
-        ("electrician", "appliance"),
-        ("manual", " labour")
-    ]
-    SubCategory = (
-        ("consult", "be a consultant"),
-        ("fixed", "Fixed Charges"),
-        ("book", "Hourly pay")
-        )
-    activity = (
-        ("active", "Worker is active"),
-        ("offline", "Worker is offline"),
-        ("Working", "Worker is busy")
-            )
-    id = models.UUIDField(unique= True, default=uuid.uuid4, primary_key=True, editable=False)
+    gender = [("M", "Male"), ("F", "Female"), ("O", "Others"), ("N", "rather not say")]
+
     name = models.CharField(
         max_length=100,
     )
@@ -62,33 +68,38 @@ class Worker(models.Model):
         max_length=500,
     )
     phoneNo = PhoneNumberField(unique=True)
-    category = models.CharField(
-        max_length=30,
-        choices=JobProfiles,
-        default=JobProfiles[-1],
-    )
     imageURL = models.ImageField(
-        upload_to=upload_worker_image, 
+        upload_to=upload_worker_image,
         storage=storages["minio"],
-        null=False, 
-        blank=False
+        null=False,
+        blank=False,
+        editable=True,
     )
-#    subcategory = MultiSelectField(choices=SubCategory, default=["consultant"], min_choices=1, max_length=20)
-    is_Consult = models.BooleanField(default=False)
-    is_Hourly = models.BooleanField(default=True)
-    is_Fixed = models.BooleanField(default=True)
-    rating = models.FloatField(default=0)
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+
+    is_working = models.BooleanField(default=False, editable=True)
+    is_online = models.BooleanField(default=False, editable=True)
+
+    work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
+
+    rating = models.FloatField(default=0, editable=True)
     dob = models.DateField(null=True, blank=True)
-    gender = models.CharField(null=True, blank=True)
-    price = models.DecimalField(max_digits=11, decimal_places=3, default=0)
-    location = models.CharField(null=True, default=True)
-    is_Live=models.CharField(max_length=30,choices=activity,default=activity[0])
-    description = models.CharField(max_length=200, blank=True, null=True)
+    gender = models.CharField(choices=gender, default=gender[-1])
+
+
+    location = models.CharField(null=True, default="", editable=True)
+
+    description = models.CharField(max_length=200, blank=True, null=True, editable=True)
+    categories = models.CharField(default='electrician')
+    sub_categories = models.JSONField(default=initialize_items, editable=True)
+
+    
     def __str__(self):
-        return f"{self.name}-{self.category}"
+        return f"{self.name}-{self.id}"
 
 
 class History(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     customer = models.ForeignKey(
         Customer,
         on_delete=models.CASCADE,
@@ -97,7 +108,7 @@ class History(models.Model):
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
     action = models.CharField(max_length=30)
     timestmp = models.DateTimeField(auto_now=True)
+    is_finished = models.BooleanField(null=False, default=True)
+
     def __str__(self):
         return f"{self.customer.name}:{self.action}:{self.worker}->{self.timestmp}"
-
-
