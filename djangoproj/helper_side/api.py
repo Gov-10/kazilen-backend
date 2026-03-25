@@ -111,12 +111,13 @@ def get_history(request):
 
 @api.post("/create-worker")
 def create_worker(request, payload: CreateWorkerSchema):
+    clean_phone = payload.phone.replace("+91", "").strip()
     worker = Worker.objects.create(
         name=payload.name,
-        phoneNo=payload.phone,
+        phoneNo=f"+91{clean_phone}",
         dob=payload.dob,
         gender=payload.gender,
-        address=payload.location,
+        address=payload.address,
     )
     return {"message": f"Hello, {worker.name}", "status": True}
 
