@@ -109,14 +109,13 @@ def get_history(request):
     return details
 
 
-@api.post("/create-worker", auth=CustomAuth())
+@api.post("/create-worker")
 def create_worker(request, payload: CreateWorkerSchema):
     worker = Worker.objects.create(
         name=payload.name,
-        phoneNo=payload.phoneNo,
+        phoneNo=payload.phone,
         dob=payload.dob,
         gender=payload.gender,
-        category=payload.category,
         address=payload.location,
     )
     return {"message": f"Hello, {worker.name}", "status": True}
