@@ -55,6 +55,7 @@ def initialize_items():
         new_data[cate] = {
             "visible": False,
             "price": 120,
+            "deatils": "",
         }
     return new_data
 
