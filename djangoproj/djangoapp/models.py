@@ -43,7 +43,7 @@ subcategories = [
         "home-wiring",
         "switch-install",
         "switch-mcb",
-        "switch-repair"
+        "switch-repair",
         "invereter-install",
         "invereter-maintainance",
         "cooler-repair",
