@@ -1,3 +1,4 @@
+from django.db.models.functions import JSONArray
 from djangoapp.models import Worker
 from djangoapp.schemas import WorkerSchema
 from django.db.models import Q, QuerySet
@@ -120,6 +121,14 @@ def create_worker(request, payload: CreateWorkerSchema):
         address=payload.address,
     )
     return {"message": f"Hello, {worker.name}", "status": True}
+
+
+@api.post("/getSubCat", auth=CustomAuth, response=JSONArray)
+def giveSubCat(request):
+    clean_id = request.id
+    all_dat = get_object_or_404(Worker.objects.values('sub_categories'), id = clean_id)
+    return all_dat
+
 
 
 @api.get("/db_health")
