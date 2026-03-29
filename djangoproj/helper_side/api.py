@@ -1,3 +1,4 @@
+from uuid import UUID
 from django.db.models.functions import JSONArray
 from djangoapp.models import Worker
 from djangoapp.schemas import WorkerSchema
@@ -123,9 +124,12 @@ def create_worker(request, payload: CreateWorkerSchema):
     return {"message": f"Hello, {worker.name}", "status": True}
 
 
-@api.post("/getSubCat", auth=CustomAuth, response=JSONArray)
-def giveSubCat(request):
-    clean_id = request.id
+class giveSub(Schema):
+    id: UUID
+
+@api.post("/getSubCat")
+def giveSubCat(request, payload: giveSub):
+    clean_id = payload.id
     all_dat = get_object_or_404(Worker, id=clean_id)
     return all_dat.sub_categories
 
