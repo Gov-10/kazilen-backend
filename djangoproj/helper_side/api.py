@@ -126,8 +126,8 @@ def create_worker(request, payload: CreateWorkerSchema):
 @api.post("/getSubCat", auth=CustomAuth, response=JSONArray)
 def giveSubCat(request):
     clean_id = request.id
-    all_dat = get_object_or_404(Worker.objects.values('sub_categories'), id = clean_id)
-    return all_dat
+    all_dat = get_object_or_404(Worker, id=clean_id)
+    return all_dat.sub_categories
 
 
 
