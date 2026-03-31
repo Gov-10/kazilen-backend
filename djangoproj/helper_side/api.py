@@ -133,6 +133,9 @@ def giveSubCat(request, payload: giveSub):
     all_dat = get_object_or_404(Worker, id=clean_id)
     return all_dat.sub_categories
 
+@api.post("/updateSubCat")
+def updateSubCatField(request, payload):
+
 
 
 @api.get("/db_health")
