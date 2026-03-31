@@ -135,7 +135,7 @@ def giveSubCat(request, payload: giveSub):
 
 @api.post("/updateSubCat")
 def updateSubCatField(request, payload):
-
+    pass
 
 
 @api.get("/db_health")
