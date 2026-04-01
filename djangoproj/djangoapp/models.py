@@ -72,8 +72,8 @@ class Worker(models.Model):
     imageURL = models.ImageField(
         upload_to=upload_worker_image,
         storage=storages["minio"],
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
         editable=True,
     )
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
