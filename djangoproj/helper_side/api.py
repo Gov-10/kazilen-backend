@@ -87,7 +87,7 @@ def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
     exists = Worker.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return 200, {'exists': True, 'id': exists.id}
+        return 200, {"exists": True, "id": exists.id}
     else:
         return 404, {"messg": "yo no bud"}
 
@@ -95,10 +95,11 @@ def unprotected_check(request, data: phonePayload):
 class getPro(Schema):
     userID: UUID
 
-@api.get("/get-profile", auth=CustomAuth(), response=WorkerSchema)
+
+@api.post("/get-profile", auth=CustomAuth(), response=WorkerSchema)
 def get_profile(request, payload: getPro):
-    data = get_object_or_404(Worker, id= payload.userID)
-    return data 
+    data = get_object_or_404(Worker, id=payload.userID)
+    return data
 
 
 @api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
@@ -127,11 +128,12 @@ def create_worker(request, payload: CreateWorkerSchema):
 class giveSub(Schema):
     id: UUID
 
-@api.post("/getSubCat")
+@api.post("/getSubCat", response=dict)
 def giveSubCat(request, payload: giveSub):
     clean_id = payload.id
     all_dat = get_object_or_404(Worker, id=clean_id)
     return all_dat.sub_categories
+
 
 @api.post("/updateSubCat")
 def updateSubCatField(request, payload):
