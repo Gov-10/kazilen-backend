@@ -82,12 +82,12 @@ def protected_check(request):
     return {"message": f"Your phone number = {phone}"}
 
 
-@api.post("/check", response={200: WorkerSchema, 404: dict})
+@api.post("/check", response={200: dict, 404: dict})
 def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
     exists = Worker.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return 200, exists
+        return 200, {'exists': True, 'id': exists.id}
     else:
         return 404, {"messg": "yo no bud"}
 
