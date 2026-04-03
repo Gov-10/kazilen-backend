@@ -128,7 +128,7 @@ def create_worker(request, payload: CreateWorkerSchema):
 class giveSub(Schema):
     id: UUID
 
-@api.post("/getSubCat", response=dict)
+@api.post("/getSubCat", response=list)
 def giveSubCat(request, payload: giveSub):
     clean_id = payload.id
     all_dat = get_object_or_404(Worker, id=clean_id)
