@@ -29,6 +29,7 @@ class Customer(models.Model):
     work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
     is_online = models.BooleanField(default=False)
 
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     def __str__(self):
         return f"id : {self.id}"
