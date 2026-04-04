@@ -1,9 +1,13 @@
 from django.db.models import Q, QuerySet
+from twilio.rest.ip_messaging.v2.service import channel
 from typing_extensions import List
 from typing import List, Optional
 from ninja import FilterSchema, NinjaAPI, Query, Router, Schema
 from django.shortcuts import get_object_or_404
 from .models import Customer, Worker, History
+
+import asyncio
+
 from .schemas import (
     CustomerSchema,
     WorkerSchema,
@@ -17,7 +21,12 @@ import hashlib
 from .utils.otp_generator import otp_gen
 from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
 from .utils.status_change import worker_update
+
 from redis import Redis
+
+
+import redis.asyncio as redisas
+
 from dotenv import load_dotenv
 import os
 import logging
@@ -163,3 +172,21 @@ def unporc_get_profile(request, data: unporc_profile):
     user_id = data.user_id
     user = get_object_or_404(Customer, id=user_id)
     return user
+
+
+
+
+async def sse_generator(target_id: str):
+    redis_conn = Redis(host='localhost', port=6379, db=0)
+    pubsub = redis_conn.pubsub()
+    channel_name = f"see_updates_{target_id}"
+    await pubsub.subscribe(channel_name)
+    try:
+        async for message in pubsub.listen():
+        payload = message['data'].decode('utf-8')
+        yield f"data: {payload}\n\n"
+    except asyncio.CancelledError:
+        pass
+    finally:
+        await pubsub.unsubscribe(channel_name)
+
