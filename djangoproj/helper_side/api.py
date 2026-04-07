@@ -1,3 +1,5 @@
+from uuid import UUID
+from django.db.models.functions import JSONArray
 from djangoapp.models import Worker
 from djangoapp.schemas import WorkerSchema
 from django.db.models import Q, QuerySet
@@ -80,23 +82,24 @@ def protected_check(request):
     return {"message": f"Your phone number = {phone}"}
 
 
-@api.post("/check", response={200: WorkerSchema, 404: dict})
+@api.post("/check", response={200: dict, 404: dict})
 def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
     exists = Worker.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return 200, exists
+        return 200, {"exists": True, "id": exists.id}
     else:
         return 404, {"messg": "yo no bud"}
 
 
-@api.get("/get-profile", auth=CustomAuth(), response=WorkerSchema)
-def get_profile(request):
-    phone = request.auth
-    if not phone:
-        return {"error": "User does not exist", "status": False}
-    details = get_object_or_404(Worker, phoneNo=phone)
-    return details
+class getPro(Schema):
+    userID: UUID
+
+
+@api.post("/get-profile", auth=CustomAuth(), response=WorkerSchema)
+def get_profile(request, payload: getPro):
+    data = get_object_or_404(Worker, id=payload.userID)
+    return data
 
 
 @api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
@@ -109,17 +112,32 @@ def get_history(request):
     return details
 
 
-@api.post("/create-worker", auth=CustomAuth())
+@api.post("/create-worker")
 def create_worker(request, payload: CreateWorkerSchema):
+    clean_phone = payload.phone.replace("+91", "").strip()
     worker = Worker.objects.create(
         name=payload.name,
-        phoneNo=payload.phoneNo,
+        phoneNo=f"+91{clean_phone}",
         dob=payload.dob,
         gender=payload.gender,
-        category=payload.category,
-        address=payload.location,
+        address=payload.address,
     )
     return {"message": f"Hello, {worker.name}", "status": True}
+
+
+class giveSub(Schema):
+    id: UUID
+
+@api.post("/getSubCat", response=list)
+def giveSubCat(request, payload: giveSub):
+    clean_id = payload.id
+    all_dat = get_object_or_404(Worker, id=clean_id)
+    return all_dat.sub_categories
+
+
+@api.post("/updateSubCat")
+def updateSubCatField(request, payload):
+    pass
 
 
 @api.get("/db_health")
@@ -133,7 +151,6 @@ def db_check(request):
         return {"status": "DB is down"}
 
 
-# kjkjdhkjshd
 class unporc_profile(Schema):
     user_id: str
 

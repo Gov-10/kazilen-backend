@@ -22,7 +22,7 @@ application = ProtocolTypeRouter(
 
         "websocket": AuthMiddlewareStack(
             URLRouter(
-                your_app.routing.websocket_urlpatterns
+                djangoapp.routing.websocket_urlpatterns
             )
         ),
     }
