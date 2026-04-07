@@ -6,6 +6,8 @@ from ninja import FilterSchema, NinjaAPI, Query, Router, Schema
 from django.shortcuts import get_object_or_404
 from .models import Customer, Worker, History
 
+from channels.layers import get_channel_layer
+
 import asyncio
 
 from .schemas import (
@@ -156,6 +158,15 @@ def db_check(request):
     except OperationalError as e:
         print(f"DB ERROR: {e}")  # testing purposes only
         return {"status": "DB is down"}
+
+
+@api.post('/wake-worker',auth = CustomAuth())
+async def wakeWorker(request, workerId: str):
+    channel_layer = get_channel_layer()
+    await channel_layer.group_send(f'pwa_signal_{workerId}', {
+            "type" : "send_wake"
+        })
+    return {"sent": True}
 
 
 # kjkjdhkjshd

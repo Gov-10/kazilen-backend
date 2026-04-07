@@ -1,6 +1,6 @@
 from django.urls import path
-from .consumers import WorkerStatusConsumer
+from . import consumers
 
-websocket_urlpatterns=[
-    path("ws/workers/", WorkerStatusConsumer.as_asgi()),
-        ]
+websocket_urlpatterns = [
+    path("ws/signal/<str:client_id>/", consumers.WorkerStatusConsumer.as_asgi()),
+]
