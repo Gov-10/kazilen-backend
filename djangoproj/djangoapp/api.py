@@ -194,8 +194,8 @@ async def sse_generator(target_id: str):
     await pubsub.subscribe(channel_name)
     try:
         async for message in pubsub.listen():
-        payload = message['data'].decode('utf-8')
-        yield f"data: {payload}\n\n"
+            payload = message['data'].decode('utf-8')
+            yield f"data: {payload}\n\n"
     except asyncio.CancelledError:
         pass
     finally:
