@@ -64,7 +64,11 @@ def getAllWorker(request):
 
 @api.get("/filterworker", response=List[WorkerSchema])
 def getFilterWorker(request, category: str):
-    filterk = {f'sub_categories__{category}__visible': True }
+    filterk = {
+            'sub_categories__contains' : [
+                {'name': category, 'visible': True}
+                ]
+            }
     filterWorker = Worker.objects.filter(**filterk)
     return filterWorker
 
@@ -194,8 +198,8 @@ async def sse_generator(target_id: str):
     await pubsub.subscribe(channel_name)
     try:
         async for message in pubsub.listen():
-        payload = message['data'].decode('utf-8')
-        yield f"data: {payload}\n\n"
+            payload = message['data'].decode('utf-8')
+            yield f"data: {payload}\n\n"
     except asyncio.CancelledError:
         pass
     finally:
