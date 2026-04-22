@@ -1,6 +1,6 @@
 from uuid import UUID
 from django.db.models.functions import JSONArray
-from djangoapp.models import Worker
+from djangoapp.models import Customer, History, Worker
 from djangoapp.schemas import WorkerSchema
 from django.db.models import Q, QuerySet
 from typing_extensions import List
@@ -149,6 +149,39 @@ def db_check(request):
     except OperationalError as e:
         print(f"DB ERROR: {e}")  # testing purposes only
         return {"status": "DB is down"}
+
+
+
+class accept_booking(Schema):
+    work = str
+
+
+
+@api.post("/acceptBooking", auth= CustomAuth())
+def acceptBooking(request, payload: accept_booking):
+    work = get_object_or_404(History, id = payload.work)
+    customerB = get_object_or_404(Customer, id = work.customer)
+    workerB = get_object_or_404(Worker, id = work.worker)
+    customerB.work_id = work.id
+    workerB.work_id = work.id
+    workerB.temp_id = None
+    customerB.temp_id = None
+    workerB.save()
+    customerB.save()
+
+
+class poll_this(Schema):
+    id: str
+
+@api.post('/pollThis', auth= CustomAuth())
+def pollThis(request, payload: poll_this):
+    workerA = get_object_or_404(Worker, id = payload.id)
+    if workerA.temp_id is not None:
+        return {"cmd": True}
+    else:
+        return {"cmd": False}
+
+
 
 
 class unporc_profile(Schema):

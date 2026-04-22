@@ -168,4 +168,13 @@ def requestBooking(request, payload: booking):
     customerB.save()
     workerB.save()
 
+class poll_this(Schema):
+    id: str
 
+@api.post('/pollThis', auth = CustomAuth())
+def pollThis(request, payload: poll_this):
+    customerA = get_object_or_404(Customer, id = payload.id)
+    if customerA.work_id is not None:
+        return {"cmd": True}
+    else:
+        return {"cmd": False}
