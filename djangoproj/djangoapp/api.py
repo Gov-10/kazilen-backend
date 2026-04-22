@@ -164,6 +164,10 @@ def db_check(request):
         return {"status": "DB is down"}
 
 
+@api.post('/set-booking', auth = CustomAuth())
+def setBooking(request, payload):
+    pass
+
 @api.post('/wake-worker',auth = CustomAuth())
 async def wakeWorker(request, workerId: str):
     channel_layer = get_channel_layer()
@@ -171,6 +175,7 @@ async def wakeWorker(request, workerId: str):
             "type" : "send_wake"
         })
     return {"sent": True}
+
 
 
 # kjkjdhkjshd

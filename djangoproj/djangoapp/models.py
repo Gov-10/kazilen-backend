@@ -111,7 +111,7 @@ class History(models.Model):
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
     action = models.CharField(max_length=30)
     timestmp = models.DateTimeField(auto_now=True)
-    is_finished = models.BooleanField(null=False, default=True)
+    is_finished = models.BooleanField(null=False, default=False)
 
     def __str__(self):
         return f"{self.customer.name}:{self.action}:{self.worker}->{self.timestmp}"
