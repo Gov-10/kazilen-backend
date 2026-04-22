@@ -158,8 +158,8 @@ def db_check(request):
         return {"status": "DB is down"}
 
 
-@api.post('/set-booking', auth = CustomAuth())
-def setBooking(request, payload: booking):
+@api.post('/requestBooking', auth = CustomAuth())
+def requestBooking(request, payload: booking):
     Booking = History.objects.create(customer=payload.customer, worker=payload.worker, action=payload.action)
     customerB = get_object_or_404(Customer, id = payload.customer)
     customerB.temp_id = Booking.id
