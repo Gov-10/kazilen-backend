@@ -27,7 +27,6 @@ from .utils.status_change import worker_update
 from redis import Redis
 
 
-import redis.asyncio as redisas
 
 from dotenv import load_dotenv
 import os
@@ -147,12 +146,6 @@ def create_account(request, payload: CreateAccountSchema):
     return {"message": "User created successfully", "name": customer.name}
 
 
-
-@api.post('/book', auth=CustomAuth())
-def bookWorker(request):
-    pass
-
-
 @api.get("/db_health")
 def db_check(request):
     try:
@@ -165,48 +158,5 @@ def db_check(request):
 
 
 @api.post('/set-booking', auth = CustomAuth())
-def setBooking(request, payload):
-    pass
-
-@api.post('/wake-worker',auth = CustomAuth())
-async def wakeWorker(request, workerId: str):
-    channel_layer = get_channel_layer()
-    await channel_layer.group_send(f'pwa_signal_{workerId}', {
-            "type" : "send_wake"
-        })
-    return {"sent": True}
-
-
-
-# kjkjdhkjshd
-class unporc_profile(Schema):
-    user_id: str
-
-@api.post("/get_user_profile")
-def unporc_get_profile(request, unporc_profile):
-    user_id = request.user_id
-    user = get_object_or_404(Customer, userID= user_id)
-
-@api.post("/get_user_profile", response=CustomerSchema)
-def unporc_get_profile(request, data: unporc_profile):
-    user_id = data.user_id
-    user = get_object_or_404(Customer, id=user_id)
-    return user
-
-
-
-
-async def sse_generator(target_id: str):
-    redis_conn = Redis(host='localhost', port=6379, db=0)
-    pubsub = redis_conn.pubsub()
-    channel_name = f"see_updates_{target_id}"
-    await pubsub.subscribe(channel_name)
-    try:
-        async for message in pubsub.listen():
-            payload = message['data'].decode('utf-8')
-            yield f"data: {payload}\n\n"
-    except asyncio.CancelledError:
-        pass
-    finally:
-        await pubsub.unsubscribe(channel_name)
-
+def setBooking(request, payload: Booking):
+     
