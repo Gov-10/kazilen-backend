@@ -74,6 +74,6 @@ class CreateAccountSchema(Schema):
 
 
 class booking(Schema):
-    Worker: str
-    Customer: str
-    Action: str
+    worker: str
+    customer: str
+    action: str

@@ -17,6 +17,7 @@ from .schemas import (
     SendOTPSchema,
     VerifyOTPSchema,
     CreateAccountSchema,
+    booking,
 )
 
 import hashlib
@@ -158,5 +159,6 @@ def db_check(request):
 
 
 @api.post('/set-booking', auth = CustomAuth())
-def setBooking(request, payload: Booking):
-     
+def setBooking(request, payload: booking):
+    Booking = History.objects.create(customer=payload.customer, worker=payload.worker, action=payload.action)
+
