@@ -161,4 +161,11 @@ def db_check(request):
 @api.post('/set-booking', auth = CustomAuth())
 def setBooking(request, payload: booking):
     Booking = History.objects.create(customer=payload.customer, worker=payload.worker, action=payload.action)
+    customerB = get_object_or_404(Customer, id = payload.customer)
+    customerB.temp_id = Booking.id
+    workerB = get_object_or_404(Worker, id = payload.worker)
+    workerB.temp_id = Booking.id
+    customerB.save()
+    workerB.save()
+
 

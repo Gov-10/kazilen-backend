@@ -27,6 +27,8 @@ class Customer(models.Model):
     dob = models.DateField(null=True, blank=True)
 
     work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
+    temp_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
+
     is_online = models.BooleanField(default=False)
 
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
@@ -84,6 +86,7 @@ class Worker(models.Model):
     is_online = models.BooleanField(default=False, editable=True)
 
     work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
+    temp_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
 
     rating = models.FloatField(default=0, editable=True)
     dob = models.DateField(null=True, blank=True)
