@@ -153,8 +153,7 @@ def db_check(request):
 
 
 class accept_booking(Schema):
-    work = str
-
+    work : str
 
 
 @api.post("/acceptBooking", auth= CustomAuth())
