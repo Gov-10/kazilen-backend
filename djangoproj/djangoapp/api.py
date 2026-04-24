@@ -175,6 +175,6 @@ class poll_this(Schema):
 def pollThis(request, payload: poll_this):
     customerA = get_object_or_404(Customer, id = payload.id)
     if customerA.work_id is not None:
-        return {"cmd": True}
+        return {"book": True}
     else:
-        return {"cmd": False}
+        return {"book": False}
