@@ -59,7 +59,7 @@ def initialize_items():
             "name" : cate,
             "visible": False,
             "price": 120,
-            "deatils": "",
+            "details": "",
         })
     return new_data
 
