@@ -55,12 +55,12 @@ subcategories = [
 def initialize_items():
     new_data = []
     for cate in subcategories:
-        new_data.append({
+        new_data.append([
             "name" : cate,
             "visible": False,
             "price": 120,
             "details": "",
-        })
+            ])
     return new_data
 
 class Worker(models.Model):
