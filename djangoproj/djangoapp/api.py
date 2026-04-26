@@ -110,7 +110,7 @@ class check_phoneNo(Schema):
 
 @api.post("/check", response={200: {"id": str}, 400: {"yo": "no"}})
 def unprotected_check(request, data: check_phoneNo):
-    valid_phone = "+91" + data.phone
+    valid_phone = f"+91{data.phone}" 
     exists = Customer.objects.filter(phoneNo=valid_phone).first()
     if exists:
         return 200 , {"id": exists.id}
