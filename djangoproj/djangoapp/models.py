@@ -53,14 +53,13 @@ subcategories = [
         "motor-rewinding",
     ]
 def initialize_items():
-    new_data = []
+    new_data = {}
     for cate in subcategories:
-        new_data.append([
-            "name" : cate,
+        new_data[cate] =  {
             "visible": False,
             "price": 120,
             "details": "",
-            ])
+            }
     return new_data
 
 class Worker(models.Model):
