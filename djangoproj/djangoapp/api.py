@@ -104,17 +104,17 @@ def protected_check(request):
     return {"message": f"Your phone number = {phone}"}
 
 
-class check_phoneNo(Schema):
+class phonePayload(Schema):
     phone: str
 
-
-@api.post("/check", response={200: dict , 400: dict})
-def unprotected_check(request, data: check_phoneNo):
-    valid_phone = f"+91{data.phone}" 
-    exists = Customer.objects.filter(phoneNo=valid_phone).first()
+@api.post("/check", response={200: dict, 404: dict})
+def unprotected_check(request, data: phonePayload):
+    valid_phone = "+91" + data.phone
+    exists = Worker.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return 200 , {"id": exists.id}
-    return 400, {"yo", "no"}
+        return 200, {"exists": True, "id": exists.id}
+    else:
+        return 404, {"messg": "yo no bud"}
 
 
 @api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
