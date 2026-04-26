@@ -157,10 +157,10 @@ def db_check(request):
 
 @api.post('/requestBooking') 
 def requestBooking(request, payload: booking):
-    Booking = History.objects.create(customer=payload.customer, worker=payload.worker, action=payload.action)
     customerB = get_object_or_404(Customer, id = payload.customer)
-    customerB.temp_id = Booking.id
     workerB = get_object_or_404(Worker, id = payload.worker)
+    Booking = History.objects.create(customer=customerB, worker=workerB, action=payload.action)
+    customerB.temp_id = Booking.id
     workerB.temp_id = Booking.id
     customerB.save()
     workerB.save()
