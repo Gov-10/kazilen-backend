@@ -1,4 +1,4 @@
-from django.db.models import Q, QuerySet
+from django.db.models import Q, BooleanField, QuerySet
 from twilio.rest.ip_messaging.v2.service import channel
 from typing_extensions import List
 from typing import List, Optional
@@ -108,14 +108,14 @@ class check_phoneNo(Schema):
     phone: str
 
 
-@api.post("/check", response={200: CustomerSchema, 404: dict})
+@api.post("/check", response={exists: str, id: str})
 def unprotected_check(request, data: check_phoneNo):
     valid_phone = "+91" + data.phone
     exists = Customer.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return 200, exists
+        return {"exists": True, "id": exists.id}
     else:
-        return 404, {"messg": "yo no bud"}
+        return {"exists": False, "id": exists.id}
 
 
 @api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
