@@ -66,7 +66,7 @@ def getAllWorker(request):
 def getFilterWorker(request, category: str):
     tempWor = Worker.objects.all()
 
-    filterWorker = tempWor.filter(**{f"sub_categories__{category}__visibility": True})
+    filterWorker = tempWor.filter(**{f"sub_categories__{category}__visibile": True})
     return filterWorker
 
 @api.post("/send-otp")
@@ -155,7 +155,7 @@ def db_check(request):
         return {"status": "DB is down"}
 
 
-@api.post('/requestBooking', auth = CustomAuth())
+@api.post('/requestBooking') 
 def requestBooking(request, payload: booking):
     Booking = History.objects.create(customer=payload.customer, worker=payload.worker, action=payload.action)
     customerB = get_object_or_404(Customer, id = payload.customer)
