@@ -65,8 +65,7 @@ def getAllWorker(request):
 @api.get("/filterworker", response=List[WorkerSchema])
 def getFilterWorker(request, category: str):
     tempWor = Worker.objects.all()
-
-    filterWorker = tempWor.filter(**{f"sub_categories__{category}__visibile": True})
+    filterWorker = tempWor.filter(**{f"sub_categories__{category}__visible": True})
     return filterWorker
 
 @api.post("/send-otp")
