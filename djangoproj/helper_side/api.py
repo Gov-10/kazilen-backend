@@ -135,9 +135,18 @@ def giveSubCat(request, payload: giveSub):
     return all_dat.sub_categories
 
 
-@api.post("/updateSubCat")
-def updateSubCatField(request, payload):
-    pass
+class UpdateSubSchema(Schema):
+    worker_id: int
+    subcategories: dict 
+
+@api.post("/update-subcategories")
+def update_worker_subcategories(request, data: UpdateSubSchema):
+    worker = get_object_or_404(Worker, id=data.worker_id)
+    
+    worker.subcategories = data.subcategories
+    worker.save()
+    
+    return {"success": True}
 
 
 @api.get("/db_health")
