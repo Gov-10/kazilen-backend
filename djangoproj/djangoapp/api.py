@@ -108,14 +108,13 @@ class check_phoneNo(Schema):
     phone: str
 
 
-@api.post("/check", response={exists: str, id: str})
+@api.post("/check", response={200: {"id": str}, 400: {"yo": "no"}})
 def unprotected_check(request, data: check_phoneNo):
     valid_phone = "+91" + data.phone
     exists = Customer.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return {"exists": True, "id": exists.id}
-    else:
-        return {"exists": False, "id": exists.id}
+        return 200 , {"id": exists.id}
+    return 400, {"yo", "no"}
 
 
 @api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
