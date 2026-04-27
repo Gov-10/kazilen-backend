@@ -27,6 +27,8 @@ class Customer(models.Model):
     dob = models.DateField(null=True, blank=True)
 
     work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
+    temp_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
+
     is_online = models.BooleanField(default=False)
 
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
@@ -51,14 +53,13 @@ subcategories = [
         "motor-rewinding",
     ]
 def initialize_items():
-    new_data = []
+    new_data = {}
     for cate in subcategories:
-        new_data.append({
-            "name" : cate,
+        new_data[cate] =  {
             "visible": False,
             "price": 120,
-            "deatils": "",
-        })
+            "details": "",
+            }
     return new_data
 
 class Worker(models.Model):
@@ -84,6 +85,7 @@ class Worker(models.Model):
     is_online = models.BooleanField(default=False, editable=True)
 
     work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
+    temp_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
 
     rating = models.FloatField(default=0, editable=True)
     dob = models.DateField(null=True, blank=True)
@@ -111,7 +113,7 @@ class History(models.Model):
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
     action = models.CharField(max_length=30)
     timestmp = models.DateTimeField(auto_now=True)
-    is_finished = models.BooleanField(null=False, default=True)
+    is_finished = models.BooleanField(null=False, default=False)
 
     def __str__(self):
         return f"{self.customer.name}:{self.action}:{self.worker}->{self.timestmp}"
