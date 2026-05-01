@@ -92,7 +92,7 @@ def verify_otp(request, payload: VerifyOTPSchema):
         return {"success": False, "error": "Invalid OTP entered"}
     session_token = secrets.token_urlsafe(32)
     logger.info(f"SESSION_TOKEN: {session_token}")
-    redis_client.setex(f"session:{session_token}", 86400, payload.phone)
+    redis_client.setex(f"session:{session_token}", 604800, payload.phone)
     logger.info("SESSION TOKEN STORED IN REDIS")
     return {"success": True, "session": session_token}
 

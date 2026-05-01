@@ -25,6 +25,7 @@ def start_pin(payload: CustomerSchema):
     redis_client.setex(f"start_otp:{customer_phone}:{worker_phone}", 86400, hashed)
     return {"startPin": start_otp}
 
+
 @app.post("/confirm-start")
 def confirmKaro(payload:WorkerSchema):
     #TODO: DB status updation and auth
