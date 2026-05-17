@@ -96,7 +96,7 @@ def verify_otp(request, payload: VerifyOTPSchema):
     logger.info("SESSION TOKEN STORED IN REDIS")
     return {"success": True, "session": session_token}
 
-@api.get("/check", auth=CustomAuth())
+@api.get("/checkp", auth=CustomAuth())
 def protected_check(request):
     phone = request.auth
     if not phone:
@@ -110,7 +110,7 @@ class phonePayload(Schema):
 @api.post("/check", response={200: dict, 404: dict})
 def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
-    exists = Worker.objects.filter(phoneNo=valid_phone).first()
+    exists = Customer.objects.filter(phoneNo=valid_phone).first()
     if exists:
         return 200, {"exists": True, "id": exists.id}
     else:
