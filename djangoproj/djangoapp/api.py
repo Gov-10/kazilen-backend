@@ -5,11 +5,6 @@ from typing import List, Optional
 from ninja import FilterSchema, NinjaAPI, Query, Router, Schema
 from django.shortcuts import get_object_or_404
 from .models import Customer, Worker, History
-
-from channels.layers import get_channel_layer
-
-import asyncio
-
 from .schemas import (
     CustomerSchema,
     WorkerSchema,
@@ -23,12 +18,7 @@ from .schemas import (
 import hashlib
 from .utils.otp_generator import otp_gen
 from .utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
-from .utils.status_change import worker_update
-
 from redis import Redis
-
-
-
 from dotenv import load_dotenv
 import os
 import logging
@@ -36,6 +26,7 @@ import secrets
 from .auth import CustomAuth
 from django.db import connections
 from django.db.utils import OperationalError
+
 
 db_conn = connections["default"]  # will change once we migrate to neon
 
@@ -52,10 +43,6 @@ redis_client = Redis(
     decode_responses=True,
 )
 
-# class workerFilter(FilterSchema):
-#     category: Optional[List[str]]
-#     subcategory: Optional[List[str]]
-
 
 @api.get("/worker", response=List[WorkerSchema])
 def getAllWorker(request):
@@ -67,6 +54,7 @@ def getFilterWorker(request, category: str):
     tempWor = Worker.objects.all()
     filterWorker = tempWor.filter(**{f"sub_categories__{category}__visible": True})
     return filterWorker
+
 
 @api.post("/send-otp")
 def send_otp(request, payload: SendOTPSchema):
@@ -96,12 +84,6 @@ def verify_otp(request, payload: VerifyOTPSchema):
     logger.info("SESSION TOKEN STORED IN REDIS")
     return {"success": True, "session": session_token}
 
-@api.get("/checkp", auth=CustomAuth())
-def protected_check(request):
-    phone = request.auth
-    if not phone:
-        return {"error": "User does not exist", "status": False}
-    return {"message": f"Your phone number = {phone}"}
 
 
 class phonePayload(Schema):
@@ -120,17 +102,12 @@ def unprotected_check(request, data: phonePayload):
 @api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
 def get_profile(request):
     phone = request.auth
-    if not phone:
-        return {"error": "User does not exist", "status": False}
     details = get_object_or_404(Customer, phoneNo=phone)
     return details
-
 
 @api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
 def get_history(request):
     phone = request.auth
-    if not phone:
-        return {"error": "User does not exist", "status": False}
     customer = get_object_or_404(Customer, phoneNo=phone)
     details = History.objects.filter(customer=customer).order_by("-timestmp")
     return details
@@ -140,6 +117,36 @@ def get_history(request):
 def create_account(request, payload: CreateAccountSchema):
     customer = Customer.objects.create(**payload.dict())
     return {"message": "User created successfully", "name": customer.name}
+
+
+@api.post("/requestBooking")
+def requestBooking(request, payload: booking):
+    customerB = get_object_or_404(Customer, id=payload.customer)
+    workerB = get_object_or_404(Worker, id=payload.worker)
+    Booking = History.objects.create(
+        customer=customerB, worker=workerB, action=payload.action
+    )
+    customerB.temp_id = Booking.id
+    workerB.temp_id = Booking.id
+    customerB.save()
+    workerB.save()
+
+
+class poll_this(Schema):
+    userId: str
+
+@api.post("/poll", auth=CustomAuth())
+def pollThis(request, payload: poll_this):
+    customerA = get_object_or_404(Customer, id=payload.userId)
+    if customerA.work_id is not None:
+        return {"book": True}
+    else:
+        return {"book": False}
+
+
+
+
+
 
 
 @api.get("/db_health")
@@ -153,23 +160,4 @@ def db_check(request):
         return {"status": "DB is down"}
 
 
-@api.post('/requestBooking') 
-def requestBooking(request, payload: booking):
-    customerB = get_object_or_404(Customer, id = payload.customer)
-    workerB = get_object_or_404(Worker, id = payload.worker)
-    Booking = History.objects.create(customer=customerB, worker=workerB, action=payload.action)
-    customerB.temp_id = Booking.id
-    workerB.temp_id = Booking.id
-    customerB.save()
-    workerB.save()
 
-class poll_this(Schema):
-    userId: str
-
-@api.post('/poll', auth = CustomAuth())
-def pollThis(request, payload: poll_this):
-    customerA = get_object_or_404(Customer, id = payload.userId)
-    if customerA.work_id is not None:
-        return {"book": True}
-    else:
-        return {"book": False}
