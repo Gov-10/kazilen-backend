@@ -28,7 +28,6 @@ from django.db import connections
 from django.db.utils import OperationalError
 
 
-db_conn = connections["default"]  # will change once we migrate to neon
 
 load_dotenv()
 
@@ -151,6 +150,7 @@ def pollThis(request, payload: poll_this):
 
 @api.get("/db_health")
 def db_check(request):
+    db_conn = connections["default"]  # will change once we migrate to neon
     try:
         with db_conn.cursor() as cursor:
             cursor.execute("SELECT 1")
