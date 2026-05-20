@@ -1,13 +1,11 @@
 from uuid import UUID
-from django.db.models.functions import JSONArray
 from djangoapp.models import Customer, History, Worker
 from djangoapp.schemas import WorkerSchema
 from django.db.models import Q, QuerySet
 from typing_extensions import List
-from typing import List, Optional
-from ninja import FilterSchema, NinjaAPI, Query, Router, Schema
+from typing import List
+from ninja import Router, Schema
 from django.shortcuts import get_object_or_404
-
 import hashlib
 from djangoapp.utils.otp_generator import otp_gen
 from djangoapp.utils.send_otp import sendOTP_SMS, sendOTP_WHATSAPP
@@ -19,14 +17,12 @@ import secrets
 from djangoapp.auth import CustomAuth
 from django.db import connections
 from django.db.utils import OperationalError
-
 from djangoapp.schemas import (
     HistorySchema,
     SendOTPSchema,
     VerifyOTPSchema,
     WorkerSchema,
 )
-
 from .schemas import phonePayload, CreateWorkerSchema
 
 db_conn = connections["default"]  # will change once we migrate to neon
@@ -74,14 +70,6 @@ def verify_otp(request, payload: VerifyOTPSchema):
     return {"success": True, "session": session_token}
 
 
-@api.post("/checkproc", auth=CustomAuth())
-def protected_check(request):
-    phone = request.auth
-    if not phone:
-        return {"error": "User does not exist", "status": False}
-    return {"message": f"Your phone number = {phone}"}
-
-
 @api.post("/check", response={200: dict, 404: dict})
 def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
@@ -94,8 +82,6 @@ def unprotected_check(request, data: phonePayload):
 
 class getPro(Schema):
     userID: UUID
-
-
 @api.post("/get-profile", auth=CustomAuth(), response=WorkerSchema)
 def get_profile(request, payload: getPro):
     data = get_object_or_404(Worker, id=payload.userID)
@@ -128,6 +114,7 @@ def create_worker(request, payload: CreateWorkerSchema):
 class giveSub(Schema):
     id: UUID
 
+
 @api.post("/getSubCat", response=list)
 def giveSubCat(request, payload: giveSub):
     clean_id = payload.id
@@ -137,39 +124,26 @@ def giveSubCat(request, payload: giveSub):
 
 class UpdateSubSchema(Schema):
     worker_id: int
-    subcategories: dict 
+    subcategories: dict
+
 
 @api.post("/update-subcategories")
 def update_worker_subcategories(request, data: UpdateSubSchema):
     worker = get_object_or_404(Worker, id=data.worker_id)
-    
     worker.subcategories = data.subcategories
     worker.save()
-    
     return {"success": True}
 
 
-@api.get("/db_health")
-def db_check(request):
-    try:
-        with db_conn.cursor() as cursor:
-            cursor.execute("SELECT 1")
-            return {"status": "DB is up"}
-    except OperationalError as e:
-        print(f"DB ERROR: {e}")  # testing purposes only
-        return {"status": "DB is down"}
-
-
-
 class accept_booking(Schema):
-    work : str
+    work: str
 
 
-@api.post("/acceptBooking", auth= CustomAuth())
+@api.post("/acceptBooking", auth=CustomAuth())
 def acceptBooking(request, payload: accept_booking):
-    work = get_object_or_404(History, id = payload.work)
-    customerB = get_object_or_404(Customer, id = work.customer)
-    workerB = get_object_or_404(Worker, id = work.worker)
+    work = get_object_or_404(History, id=payload.work)
+    customerB = get_object_or_404(Customer, id=work.customer)
+    workerB = get_object_or_404(Worker, id=work.worker)
     customerB.work_id = work.id
     workerB.work_id = work.id
     workerB.temp_id = None
@@ -181,22 +155,32 @@ def acceptBooking(request, payload: accept_booking):
 class poll_this(Schema):
     id: str
 
-@api.post('/pollThis', auth= CustomAuth())
+
+@api.post("/pollThis", auth=CustomAuth())
 def pollThis(request, payload: poll_this):
-    workerA = get_object_or_404(Worker, id = payload.id)
+    workerA = get_object_or_404(Worker, id=payload.id)
     if workerA.temp_id is not None:
         return {"cmd": True}
     else:
         return {"cmd": False}
 
 
-
-
-class unporc_profile(Schema):
+class customer_profile(Schema):
     user_id: str
 
 
 @api.post("/get_user_profile")
-def unporc_get_profile(request, unporc_profile):
+def unporc_get_profile(request, customer_profile):
     user_id = request.user_id
     user = get_object_or_404(Customer, userID=user_id)
+
+
+@api.get("/db_health")
+def db_check(request):
+    try:
+        with db_conn.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            return {"status": "DB is up"}
+    except OperationalError as e:
+        print(f"DB ERROR: {e}")  # testing purposes only
+        return {"status": "DB is down"}
