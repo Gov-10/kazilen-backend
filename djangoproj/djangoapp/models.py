@@ -26,6 +26,10 @@ class Customer(models.Model):
     gender = models.CharField(max_length=100, choices=gender, default=gender[-0])
     dob = models.DateField(null=True, blank=True)
 
+    address = models.CharField(null=True, default="nagpur", editable=True)
+
+    geo_location = models.CharField(null=True, editable=True)
+
     work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
     temp_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
 
@@ -70,6 +74,8 @@ class Worker(models.Model):
     )
     address = models.CharField(
         max_length=500,
+        null=True,
+        editable=True,
     )
     phoneNo = PhoneNumberField(unique=True)
     imageURL = models.ImageField(
@@ -81,14 +87,14 @@ class Worker(models.Model):
     )
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
-    is_working = models.BooleanField(default=False, editable=True)
-    is_online = models.BooleanField(default=False, editable=True)
+    is_working = models.BooleanField(default=False, editable=True, null=True)
+    is_online = models.BooleanField(default=False, editable=True, null=True)
 
     work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
     temp_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
 
-    rating = models.FloatField(default=0, editable=True)
-    dob = models.DateField(null=True, blank=True)
+    rating = models.FloatField(default=0, editable=True, )
+    dob = models.DateField(null=True)
     gender = models.CharField(choices=gender, default=gender[-1])
 
 
@@ -115,5 +121,6 @@ class History(models.Model):
     timestmp = models.DateTimeField(auto_now=True)
     is_finished = models.BooleanField(null=False, default=False)
 
+    geo_location = models.CharField(null=True, editable=True)
     def __str__(self):
-        return f"{self.customer.name}:{self.action}:{self.worker}->{self.timestmp}"
+        return f"{self.id}@{self.customer.name}:{self.action}:{self.worker}->{self.timestmp}"

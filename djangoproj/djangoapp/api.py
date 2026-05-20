@@ -80,9 +80,9 @@ def verify_otp(request, payload: VerifyOTPSchema):
         return {"success": False, "error": "Invalid OTP entered"}
     session_token = secrets.token_urlsafe(32)
     logger.info(f"SESSION_TOKEN: {session_token}")
-    redis_client.setex(f"session:{session_token}", 86400, payload.phone)
+    redis_client.setex(f"session:{session_token}", 604800, payload.phone)
     logger.info("SESSION TOKEN STORED IN REDIS")
-    return {"success": True, "session": session_token}
+    return {"success": True, "session_token": session_token}
 
 
 
@@ -94,15 +94,16 @@ def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
     exists = Customer.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return 200, {"exists": True, "id": exists.id}
+        return 200, {"exists": True, "userId": exists.id}
     else:
         return 404, {"messg": "yo no bud"}
 
+class userIdGETTT(Schema):
+    userId: str
 
 @api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
-def get_profile(request):
-    phone = request.auth
-    details = get_object_or_404(Customer, phoneNo=phone)
+def get_profile(request, payload : userIdGETTT):
+    details = get_object_or_404(Customer, id=payload.userId)
     return details
 
 @api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
@@ -116,7 +117,7 @@ def get_history(request):
 @api.post("/create-account")
 def create_account(request, payload: CreateAccountSchema):
     customer = Customer.objects.create(**payload.dict())
-    return {"message": "User created successfully", "name": customer.name}
+    return {"message": "User created successfully", "userId": customer.id}
 
 
 @api.post("/requestBooking")
@@ -132,6 +133,18 @@ def requestBooking(request, payload: booking):
     workerB.save()
 
 
+class userID(Schema):
+    userId: str
+@api.post("/get-book-status")
+def getStatusBook(request, payload: userID):
+    customer = get_object_or_404(Customer, id=payload.userId)
+    action = get_object_or_404(History, id=customer.work_id)
+    return {
+            "name": action.worker.name,
+            "price": action.price,
+            "location": action.geo_location,
+            }
+
 class poll_this(Schema):
     userId: str
 
@@ -142,10 +155,6 @@ def pollThis(request, payload: poll_this):
         return {"book": True}
     else:
         return {"book": False}
-
-
-
-
 
 
 
