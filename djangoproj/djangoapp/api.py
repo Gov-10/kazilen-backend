@@ -143,7 +143,9 @@ def pollThis(request, payload: poll_this):
         return {"book": False}
 
 
-
+@api.get("/health")
+def helchek(request):
+    return {"status": "RUNNING"}
 
 
 
