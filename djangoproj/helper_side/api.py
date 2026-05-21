@@ -156,13 +156,17 @@ class poll_this(Schema):
     id: str
 
 
-@api.post("/pollThis", auth=CustomAuth())
+@api.post("/poll", auth=CustomAuth())
 def pollThis(request, payload: poll_this):
     workerA = get_object_or_404(Worker, id=payload.id)
-    if workerA.temp_id is not None:
-        return {"cmd": True}
+    Request = (workerA.temp_id is not None)
+    work = (workerA.work_id is not None)
+    if not work and Request:
+        return {"cmd": False, "request": True}
+    elif work and not Request:
+        return {"cmd": True, "request": False}
     else:
-        return {"cmd": False}
+        return {"cmd": False, "request" : False}
 
 
 class customer_profile(Schema):
