@@ -82,6 +82,8 @@ def unprotected_check(request, data: phonePayload):
 
 class getPro(Schema):
     userID: UUID
+
+
 @api.post("/get-profile", auth=CustomAuth(), response=WorkerSchema)
 def get_profile(request, payload: getPro):
     data = get_object_or_404(Worker, id=payload.userID)
@@ -137,6 +139,7 @@ def update_worker_subcategories(request, data: UpdateSubSchema):
 
 class accept_booking(Schema):
     work: str
+    accept: bool
 
 
 @api.post("/acceptBooking", auth=CustomAuth())
@@ -144,7 +147,11 @@ def acceptBooking(request, payload: accept_booking):
     work = get_object_or_404(History, id=payload.work)
     customerB = get_object_or_404(Customer, id=work.customer)
     workerB = get_object_or_404(Worker, id=work.worker)
-    customerB.work_id = work.id
+
+    if not payload.accept:
+        workerB.temp_id = None
+        customerB.temp_id = None
+        return
     workerB.work_id = work.id
     workerB.temp_id = None
     customerB.temp_id = None
@@ -159,14 +166,14 @@ class poll_this(Schema):
 @api.post("/poll", auth=CustomAuth())
 def pollThis(request, payload: poll_this):
     workerA = get_object_or_404(Worker, id=payload.id)
-    Request = (workerA.temp_id is not None)
-    work = (workerA.work_id is not None)
+    Request = workerA.temp_id is not None
+    work = workerA.work_id is not None
     if not work and Request:
         return {"cmd": False, "request": True}
     elif work and not Request:
         return {"cmd": True, "request": False}
     else:
-        return {"cmd": False, "request" : False}
+        return {"cmd": False, "request": False}
 
 
 class customer_profile(Schema):
@@ -177,6 +184,7 @@ class customer_profile(Schema):
 def unporc_get_profile(request, customer_profile):
     user_id = request.user_id
     user = get_object_or_404(Customer, userID=user_id)
+    return user
 
 
 @api.get("/db_health")
