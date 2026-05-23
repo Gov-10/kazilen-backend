@@ -158,6 +158,24 @@ def acceptBooking(request, payload: accept_booking):
     workerB.save()
     customerB.save()
 
+class getBooking(Schema):
+    userId: str
+
+@api.post('/get-book', auth=CustomAuth)
+def getbooking(request, payload):
+    worker = get_object_or_404(Worker, id = payload.userId)
+    request = worker.temp_id is not None
+    curr_work = worker.work_id is not None
+    if curr_work:
+
+        return {
+                id : worker.work_id,
+                author : customer.name
+                action : wor
+                }
+
+
+
 
 class poll_this(Schema):
     id: str
@@ -168,12 +186,7 @@ def pollThis(request, payload: poll_this):
     workerA = get_object_or_404(Worker, id=payload.id)
     Request = workerA.temp_id is not None
     work = workerA.work_id is not None
-    if not work and Request:
-        return {"cmd": False, "request": True}
-    elif work and not Request:
-        return {"cmd": True, "request": False}
-    else:
-        return {"cmd": False, "request": False}
+    return {"work": work, "request": Request}
 
 
 class customer_profile(Schema):
