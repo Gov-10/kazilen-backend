@@ -147,7 +147,7 @@ def acceptBooking(request, payload: accept_booking):
     work = get_object_or_404(History, id=payload.work)
     customerB = get_object_or_404(Customer, id=work.customer)
     workerB = get_object_or_404(Worker, id=work.worker)
-
+    workerB.is_working = True
     if not payload.accept:
         workerB.temp_id = None
         customerB.temp_id = None
@@ -158,24 +158,15 @@ def acceptBooking(request, payload: accept_booking):
     workerB.save()
     customerB.save()
 
+
 class getBooking(Schema):
     userId: str
 
-@api.post('/get-book', auth=CustomAuth)
+
+@api.post("/get-book", auth=CustomAuth)
 def getbooking(request, payload):
-    worker = get_object_or_404(Worker, id = payload.userId)
-    request = worker.temp_id is not None
-    curr_work = worker.work_id is not None
-    if curr_work:
-
-        return {
-                id : worker.work_id,
-                author : customer.name
-                action : wor
-                }
-
-
-
+    worker = get_object_or_404(Worker, id=payload.userId)
+    return {"work": worker.work_id, "request": worker.temp_id}
 
 class poll_this(Schema):
     id: str
