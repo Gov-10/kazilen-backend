@@ -145,7 +145,7 @@ class accept_booking(Schema):
 @api.post("/acceptBooking", auth=CustomAuth())
 def acceptBooking(request, payload: accept_booking):
     worker_ = get_object_or_404(Worker, id=payload.usr)
-    work = get_object_or_404(History, id = worker_.temp_id)
+    work = get_object_or_404(History, id=worker_.temp_id)
     customerB = get_object_or_404(Customer, id=work.customer)
     worker_.is_working = True
     if not payload.accept:
@@ -167,31 +167,31 @@ class getBooking(Schema):
     userId: str
 
 
-@api.post("/get-book", auth=CustomAuth)
-def getbooking(request, payload):
+@api.post("/get-book", auth=CustomAuth())
+def getbooking(request, payload: getBooking):
     worker = get_object_or_404(Worker, id=payload.userId)
     return {"work": worker.work_id, "request": worker.temp_id}
 
-@api.post("/get-action", auth=CustomAuth)
-def getAction(request, payload: str):
-    action = get_object_or_404(History, id= payload.id)
-    customer_ = get_object_or_404(Customer, id = action.customer)
-    return {
-            "action": action.action,
-            "customer": customer_.name,
-            "location": customer_.location,
-            "time": action.timestmp,
-            }
 
+@api.post("/get-action", auth=CustomAuth())
+def getAction(request, payload: str):
+    action = get_object_or_404(History, id=payload.id)
+    customer_ = get_object_or_404(Customer, id=action.customer)
+    return {
+        "action": action.action,
+        "customer": customer_.name,
+        "location": customer_.location,
+        "time": action.timestmp,
+    }
 
 
 class poll_this(Schema):
-    id: str
+    userId: str
 
 
 @api.post("/poll", auth=CustomAuth())
 def pollThis(request, payload: poll_this):
-    workerA = get_object_or_404(Worker, id=payload.id)
+    workerA = get_object_or_404(Worker, id=payload.userId)
     Request = workerA.temp_id is not None
     work = workerA.work_id is not None
     return {"work": work, "request": Request}
