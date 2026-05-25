@@ -168,6 +168,19 @@ def getbooking(request, payload):
     worker = get_object_or_404(Worker, id=payload.userId)
     return {"work": worker.work_id, "request": worker.temp_id}
 
+
+@api.post("/get-action", auth=CustomAuth)
+def getAction(request, payload: str):
+    action = get_object_or_404(History, id=payload.id)
+    customer_ = get_object_or_404(Customer, id=action.customer)
+    return {
+        "action": action.action,
+        "customer": customer_.name,
+        "location": customer_.location,
+        "time": action.timestmp,
+    }
+
+
 class poll_this(Schema):
     id: str
 
