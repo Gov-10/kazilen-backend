@@ -138,25 +138,29 @@ def update_worker_subcategories(request, data: UpdateSubSchema):
 
 
 class accept_booking(Schema):
-    work: str
+    usr: str
     accept: bool
 
 
 @api.post("/acceptBooking", auth=CustomAuth())
 def acceptBooking(request, payload: accept_booking):
-    work = get_object_or_404(History, id=payload.work)
+    worker_ = get_object_or_404(Worker, id=payload.usr)
+    work = get_object_or_404(History, id = worker_.temp_id)
     customerB = get_object_or_404(Customer, id=work.customer)
-    workerB = get_object_or_404(Worker, id=work.worker)
-    workerB.is_working = True
+    worker_.is_working = True
     if not payload.accept:
-        workerB.temp_id = None
+        worker_.temp_id = None
+        worker_.is_working = False
         customerB.temp_id = None
-        return
-    workerB.work_id = work.id
-    workerB.temp_id = None
+        worker_.save()
+        customerB.save()
+        return 200
+    worker_.work_id = work.id
+    worker_.temp_id = None
     customerB.temp_id = None
-    workerB.save()
+    worker_.save()
     customerB.save()
+    return 200
 
 
 class getBooking(Schema):
@@ -168,17 +172,17 @@ def getbooking(request, payload):
     worker = get_object_or_404(Worker, id=payload.userId)
     return {"work": worker.work_id, "request": worker.temp_id}
 
-
 @api.post("/get-action", auth=CustomAuth)
 def getAction(request, payload: str):
-    action = get_object_or_404(History, id=payload.id)
-    customer_ = get_object_or_404(Customer, id=action.customer)
+    action = get_object_or_404(History, id= payload.id)
+    customer_ = get_object_or_404(Customer, id = action.customer)
     return {
-        "action": action.action,
-        "customer": customer_.name,
-        "location": customer_.location,
-        "time": action.timestmp,
-    }
+            "action": action.action,
+            "customer": customer_.name,
+            "location": customer_.location,
+            "time": action.timestmp,
+            }
+
 
 
 class poll_this(Schema):
