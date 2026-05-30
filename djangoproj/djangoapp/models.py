@@ -26,6 +26,8 @@ class Customer(models.Model):
     gender = models.CharField(max_length=100, choices=gender, default=gender[-0])
     dob = models.DateField(null=True, blank=True)
 
+    location = models.CharField(null=True, default="", editable=True)
+
     work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
     temp_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
 
@@ -116,4 +118,4 @@ class History(models.Model):
     is_finished = models.BooleanField(null=False, default=False)
 
     def __str__(self):
-        return f"{self.customer.name}:{self.action}:{self.worker}->{self.timestmp}"
+        return f"{self.id}@{self.customer.name}:{self.action}:{self.worker}->{self.timestmp}"

@@ -172,11 +172,13 @@ def getbooking(request, payload: getBooking):
     worker = get_object_or_404(Worker, id=payload.userId)
     return {"work": worker.work_id, "request": worker.temp_id}
 
+class getaction(Schema):
+    id : str
 
-@api.post("/get-action", auth=CustomAuth())
-def getAction(request, payload: str):
+@api.post("/get-action")
+def getAction(request, payload: getaction):
     action = get_object_or_404(History, id=payload.id)
-    customer_ = get_object_or_404(Customer, id=action.customer)
+    customer_ = action.customer
     return {
         "action": action.action,
         "customer": customer_.name,
