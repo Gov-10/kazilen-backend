@@ -146,7 +146,7 @@ class accept_booking(Schema):
 def acceptBooking(request, payload: accept_booking):
     worker_ = get_object_or_404(Worker, id=payload.usr)
     work = get_object_or_404(History, id=worker_.temp_id)
-    customerB = get_object_or_404(Customer, id=work.customer)
+    customerB = work.customer
     worker_.is_working = True
     if not payload.accept:
         worker_.temp_id = None
