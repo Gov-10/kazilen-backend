@@ -26,7 +26,9 @@ class Customer(models.Model):
     gender = models.CharField(max_length=100, choices=gender, default=gender[-0])
     dob = models.DateField(null=True, blank=True)
 
-    location = models.CharField(null=True, default="nagpur", editable=True)
+    address = models.CharField(null=True, default="nagpur", editable=True)
+
+    geo_location = models.CharField(null=True, editable=True)
 
     work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
     temp_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
