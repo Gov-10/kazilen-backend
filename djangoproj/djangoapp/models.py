@@ -119,5 +119,6 @@ class History(models.Model):
     timestmp = models.DateTimeField(auto_now=True)
     is_finished = models.BooleanField(null=False, default=False)
 
+    geo_location = models.CharField(null=True, editable=True)
     def __str__(self):
         return f"{self.id}@{self.customer.name}:{self.action}:{self.worker}->{self.timestmp}"
