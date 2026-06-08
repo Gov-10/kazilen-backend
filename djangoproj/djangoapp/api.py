@@ -145,10 +145,6 @@ def pollThis(request, payload: poll_this):
 
 
 
-
-
-
-
 @api.get("/db_health")
 def db_check(request):
     try:
