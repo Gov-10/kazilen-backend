@@ -35,10 +35,10 @@ class Customer(models.Model):
 
     is_online = models.BooleanField(default=False)
 
-    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+    cus_id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     def __str__(self):
-        return f"id : {self.id}"
+        return f"{self.name}-{self.phoneNo}"
 
 
 subcategories = [
@@ -83,7 +83,7 @@ class Worker(models.Model):
         blank=True,
         editable=True,
     )
-    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+    worker_id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     is_working = models.BooleanField(default=False, editable=True)
     is_online = models.BooleanField(default=False, editable=True)
@@ -104,11 +104,11 @@ class Worker(models.Model):
 
     
     def __str__(self):
-        return f"{self.name}-{self.id}"
+        return f"{self.name}"
 
 
 class History(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+    his_id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     customer = models.ForeignKey(
         Customer,
         on_delete=models.CASCADE,
