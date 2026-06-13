@@ -97,11 +97,12 @@ def unprotected_check(request, data: phonePayload):
     else:
         return 404, {"messg": "yo no bud"}
 
+class userIdGETTT(Schema):
+    userId: str
 
 @api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
-def get_profile(request):
-    phone = request.auth
-    details = get_object_or_404(Customer, phoneNo=phone)
+def get_profile(request, payload : userIdGETTT):
+    details = get_object_or_404(Customer, id=payload.userId)
     return details
 
 @api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
@@ -131,6 +132,18 @@ def requestBooking(request, payload: booking):
     workerB.save()
 
 
+class userID(Schema):
+    userId: str
+@api.post("/get-book-status")
+def getStatusBook(request, payload: userID):
+    customer = get_object_or_404(Customer, id=payload.userId)
+    action = get_object_or_404(History, id=customer.work_id)
+    return {
+            "name": action.worker.name,
+            "price": action.price,
+            "location": action.geo_location,
+            }
+
 class poll_this(Schema):
     userId: str
 
@@ -143,12 +156,15 @@ def pollThis(request, payload: poll_this):
         return {"book": False}
 
 
+<<<<<<< HEAD
+=======
 @api.get("/health")
 def helchek(request):
     return {"status": "RUNNING"}
 
 
 
+>>>>>>> 2e91c0505b576cb63f7b4595b515d4b46df0f211
 
 @api.get("/db_health")
 def db_check(request):

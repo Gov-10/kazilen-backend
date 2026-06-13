@@ -81,6 +81,8 @@ def unprotected_check(request, data: phonePayload):
 
 class getPro(Schema):
     userID: UUID
+
+
 @api.post("/get-profile", auth=CustomAuth(), response=WorkerSchema)
 def get_profile(request, payload: getPro):
     data = get_object_or_404(Worker, id=payload.userID)
@@ -135,33 +137,65 @@ def update_worker_subcategories(request, data: UpdateSubSchema):
 
 
 class accept_booking(Schema):
-    work: str
+    usr: str
+    accept: bool
 
 
 @api.post("/acceptBooking", auth=CustomAuth())
 def acceptBooking(request, payload: accept_booking):
-    work = get_object_or_404(History, id=payload.work)
-    customerB = get_object_or_404(Customer, id=work.customer)
-    workerB = get_object_or_404(Worker, id=work.worker)
-    customerB.work_id = work.id
-    workerB.work_id = work.id
-    workerB.temp_id = None
+    worker_ = get_object_or_404(Worker, id=payload.usr)
+    work = get_object_or_404(History, id=worker_.temp_id)
+    customerB = work.customer
+    worker_.is_working = True
+    if not payload.accept:
+        worker_.temp_id = None
+        worker_.is_working = False
+        customerB.temp_id = None
+        worker_.save()
+        customerB.save()
+        return 200
+    worker_.work_id = work.id
+    worker_.temp_id = None
     customerB.temp_id = None
-    workerB.save()
+    worker_.save()
     customerB.save()
+    return 200
+
+
+class getBooking(Schema):
+    userId: str
+
+
+@api.post("/get-book", auth=CustomAuth())
+def getbooking(request, payload: getBooking):
+    worker = get_object_or_404(Worker, id=payload.userId)
+    return {"work": worker.work_id, "request": worker.temp_id}
+
+class getaction(Schema):
+    id : str
+
+@api.post("/get-action")
+def getAction(request, payload: getaction):
+    action = get_object_or_404(History, id=payload.id)
+    customer_ = action.customer
+    return {
+        "action": action.action,
+        "customer": customer_.name,
+        "location": customer_.location,
+        "time": action.timestmp,
+    }
 
 
 class poll_this(Schema):
-    id: str
+    userId: str
 
 
-@api.post("/pollThis", auth=CustomAuth())
+@api.post("/poll", auth=CustomAuth())
 def pollThis(request, payload: poll_this):
-    workerA = get_object_or_404(Worker, id=payload.id)
-    if workerA.temp_id is not None:
-        return {"cmd": True}
-    else:
-        return {"cmd": False}
+    workerA = get_object_or_404(Worker, id=payload.userId)
+    Request = workerA.temp_id is not None
+    work = workerA.work_id is not None
+    return {"work": work, "request": Request}
 
 
 class customer_profile(Schema):
@@ -172,6 +206,7 @@ class customer_profile(Schema):
 def unporc_get_profile(request, customer_profile):
     user_id = request.user_id
     user = get_object_or_404(Customer, userID=user_id)
+    return user
 
 
 @api.get("/db_health")
