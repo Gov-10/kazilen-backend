@@ -98,11 +98,12 @@ def unprotected_check(request, data: phonePayload):
     else:
         return 404, {"messg": "yo no bud"}
 
+class userIdGETTT(Schema):
+    userId: str
 
 @api.get("/get-profile", auth=CustomAuth(), response=CustomerSchema)
-def get_profile(request):
-    phone = request.auth
-    details = get_object_or_404(Customer, phoneNo=phone)
+def get_profile(request, payload : userIdGETTT):
+    details = get_object_or_404(Customer, id=payload.userId)
     return details
 
 @api.get("/get-history", auth=CustomAuth(), response=List[HistorySchema])
