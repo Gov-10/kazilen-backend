@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 import os, json, hashlib, jwt
 from redis import Redis
+from utils.ot_gen import otp_gen
+from utils.send_otp import sendOTP_SMS
 from datetime import datetime, timedelta
 from schema import SendOTPSchema, VerifyOTPSchema, CheckSchema, CreateSchema
 from dotenv import load_dotenv
