@@ -62,7 +62,10 @@ SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"
 CSRF_COOKIE_SECURE = True
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://kazilen-prod-899213799870.asia-south1.run.app",
+    "https://kazilen.com"
+]
 
 INSTALLED_APPS = [
     "daphne",
