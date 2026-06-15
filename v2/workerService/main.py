@@ -1,17 +1,20 @@
-from fastapi import FastAPI, HTTPException, Depends, Response, Request, APIRouter
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Request, Response, Depends, APIRouter
 from sqlalchemy.orm import Session
 import os, json, hashlib, jwt
 from redis import Redis
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
+from database import sessionLocal, Workers
 from utils.ot_gen import otp_gen
 from utils.send_otp import sendOTP_SMS
-from datetime import datetime, timedelta
-from schema import SendOTPSchema, VerifyOTPSchema, CheckSchema, CreateSchema
-from dotenv import load_dotenv
-from database import sessionLocal, Customers
 load_dotenv()
 import logging
+app=FastAPI()
+router=APIRouter(prefix="/workers")
 
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger=logging.getLogger("worker")
+redis_client=Redis(host=os.getenv("REDIS_URL"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"), decode_responses=True)
 def get_db():
     db=sessionLocal()
     try:
@@ -19,22 +22,11 @@ def get_db():
     finally:
         db.close()
 
-app=FastAPI()
-router = APIRouter(prefix="/customers")
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger=logging.getLogger("customer")
-redis_client = Redis(
-    host=os.getenv("REDIS_URL"),
-    port=int(os.getenv("REDIS_PORT")),
-    password=os.getenv("REDIS_PASSWORD"),
-    decode_responses=True,
-)
-
 @router.get("/")
 def chek():
     return {"status": "Running"}
 
-@router.post("/send-otp")
+@router.get("/send-otp")
 def send_otp(payload: SendOTPSchema):
     phone=payload.phone
     otp= otp_gen()
@@ -68,7 +60,7 @@ def db_check(response: Response, payload: CheckSchema, db: Session=Depends(get_d
     pay =jwt.decode(token, "supersecret", algorithms=["HS256"])
     phone=pay.get("sub")
     valid_phone = phone
-    cus= db.query(Customers).filter(Customers.phone==valid_phone).first()
+    cus= db.query(Workers).filter(Workers.phone==valid_phone).first()
     if not cus:
         logger.error(json.dumps({"event": "user_not_found", "phone": valid_phone}))
         raise HTTPException(status_code=404, detail="User not found")
@@ -86,11 +78,11 @@ def get_profile(request: Request, db:Session=Depends(get_db)):
         raise HTTPException(status_code=401, detail="no tokens found")
     pay=jwt.decode(token, "supersecret", algorithms=["HS256"])
     phone=pay.get("sub")
-    cus=db.query(Customers).filter(Customers.phone==phone).first()
+    cus=db.query(Workers).filter(Workers.phone==phone).first()
     if not cus:
         logger.error(json.dumps({"event": "customer not found", "phone": phone}))
         raise HTTPException(status_code=404, detail="user not found")
-    return {"gender": cus.gender, "name": cus.name, "phone": cus.phone, "dob": cus.dob, "address": cus.address}
+    return {"gender": cus.gender, "name": cus.name, "address": cus.address, "phone": cus.phone, "dob": cus.dob, "rating": cus.rating, "categories": cus.categories, "sub_categories": cus.sub_categories}
 
 @router.post("/logout")
 def logou(request: Request, db:Session=Depends(get_db), response: Response):
@@ -103,33 +95,29 @@ def logou(request: Request, db:Session=Depends(get_db), response: Response):
 
 @router.post("/create-account")
 def create_acc(payload: CreateSchema, db:Session=Depends(get_db)):
-    name, phone=payload.name, payload.phone
-    address=payload.address
-    gender, dob=payload.gender, payload.dob
-    db_note=Customers(name=name, phone=phone, gender=gender, dob=dob, address=address)
+    gender, name=payload.gender, payload.name
+    address, phone=payload.address, payload.phone
+    dob, categories=payload.dob, payload.categories
+    sub_categories=payload.sub_categories
+    db_note=Workers(gender=gender, name=name, address=address, phone=phone, dob=dob, categories=categories, sub_categories=sub_categories)
     db.add(db_note)
     try:
         db.commit()
-        logger.info(json.dumps({"event": "account_created", "id": db_note.id}))
+        logger.info(json.dumps({"event": "worker_created"}))
     except Exception as e:
         db.rollback()
         logger.error(json.dumps({"event": "db_error", "error": str(e)}))
         raise HTTPException(status_code=500, detail="database error")
     db.refresh(db_note)
-    return JSONResponse(status_code=200, content={"message": "user created success"})
+    return {"message": f"worker created: {db_note.id}"}
 
 @router.post("/get-history")
 def get_his(request: Request, db:Session=Depends(get_db)):
     pass
 
-
 app.include_router(router)
 
 
-    
-    
-    
-    
 
-    
-    
+
+
