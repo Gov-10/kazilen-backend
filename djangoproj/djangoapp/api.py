@@ -82,7 +82,7 @@ def verify_otp(request, payload: VerifyOTPSchema):
     logger.info(f"SESSION_TOKEN: {session_token}")
     redis_client.setex(f"session:{session_token}", 604800, payload.phone)
     logger.info("SESSION TOKEN STORED IN REDIS")
-    return {"success": True, "session": session_token}
+    return {"success": True, "session_token": session_token}
 
 
 
@@ -94,7 +94,7 @@ def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
     exists = Customer.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return 200, {"exists": True, "id": exists.id}
+        return 200, {"exists": True, "userId": exists.id}
     else:
         return 404, {"messg": "yo no bud"}
 
