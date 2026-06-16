@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from database import sessionLocal, Workers
 from utils.ot_gen import otp_gen
 from utils.send_otp import sendOTP_SMS
+from schema import SendOTPSchema, VerifyOTPSchema, CreateSchema, CheckSchema
 load_dotenv()
 import logging
 app=FastAPI()
