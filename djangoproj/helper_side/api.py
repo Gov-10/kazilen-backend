@@ -75,7 +75,7 @@ def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
     exists = Worker.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return 200, {"exists": True, "id": exists.id}
+        return 200, {"exists": True, "userId": exists.id}
     else:
         return 404, {"messg": "yo no bud"}
 
