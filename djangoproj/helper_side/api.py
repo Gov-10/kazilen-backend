@@ -103,7 +103,7 @@ def get_history(request):
 @api.post("/create-account")
 def create_worker(request, payload: CreateWorkerSchema):
     worker = Worker.objects.create(**payload.dict())
-    return {"message": "User created successfully", "name": worker.name}
+    return {"message": "User created successfully", "userId": worker.id}
 
 
 
