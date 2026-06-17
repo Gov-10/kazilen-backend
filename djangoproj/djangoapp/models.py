@@ -74,6 +74,8 @@ class Worker(models.Model):
     )
     address = models.CharField(
         max_length=500,
+        null=True,
+        editable=True,
     )
     phoneNo = PhoneNumberField(unique=True)
     imageURL = models.ImageField(
@@ -85,14 +87,14 @@ class Worker(models.Model):
     )
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
-    is_working = models.BooleanField(default=False, editable=True)
-    is_online = models.BooleanField(default=False, editable=True)
+    is_working = models.BooleanField(default=False, editable=True, null=True)
+    is_online = models.BooleanField(default=False, editable=True, null=True)
 
     work_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
     temp_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
 
-    rating = models.FloatField(default=0, editable=True)
-    dob = models.DateField(null=True, blank=True)
+    rating = models.FloatField(default=0, editable=True, )
+    dob = models.DateField()
     gender = models.CharField(choices=gender, default=gender[-1])
 
 
