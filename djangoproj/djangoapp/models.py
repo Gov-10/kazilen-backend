@@ -94,7 +94,7 @@ class Worker(models.Model):
     temp_id = models.UUIDField(null=True, primary_key=False, blank=True, editable=True)
 
     rating = models.FloatField(default=0, editable=True, )
-    dob = models.DateField()
+    dob = models.DateField(null=True)
     gender = models.CharField(choices=gender, default=gender[-1])
 
 
