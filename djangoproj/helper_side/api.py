@@ -100,7 +100,7 @@ def get_history(request):
     return details
 
 
-@api.post("/create-worker")
+@api.post("/create-account")
 def create_worker(request, payload: CreateWorkerSchema):
     clean_phone = payload.phone.replace("+91", "").strip()
     worker = Worker.objects.create(
