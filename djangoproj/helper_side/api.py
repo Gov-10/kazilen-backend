@@ -74,7 +74,7 @@ def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
     exists = Worker.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return 200, {"exists": True, "id": exists.id}
+        return 200, {"exists": True, "userId": exists.id}
     else:
         return 404, {"messg": "yo no bud"}
 
@@ -99,17 +99,11 @@ def get_history(request):
     return details
 
 
-@api.post("/create-worker")
+@api.post("/create-account")
 def create_worker(request, payload: CreateWorkerSchema):
-    clean_phone = payload.phone.replace("+91", "").strip()
-    worker = Worker.objects.create(
-        name=payload.name,
-        phoneNo=f"+91{clean_phone}",
-        dob=payload.dob,
-        gender=payload.gender,
-        address=payload.address,
-    )
-    return {"message": f"Hello, {worker.name}", "status": True}
+    worker = Worker.objects.create(**payload.dict())
+    return {"message": "User created successfully", "userId": worker.id}
+
 
 
 class giveSub(Schema):

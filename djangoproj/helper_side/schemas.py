@@ -6,8 +6,7 @@ class phonePayload(Schema):
     phone: str
 
 class CreateWorkerSchema(Schema):
-    phone: str
+    phoneNo: str
     name: str
     dob: str
     gender:str
-    address:str
