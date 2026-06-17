@@ -25,7 +25,6 @@ from djangoapp.schemas import (
 )
 from .schemas import phonePayload, CreateWorkerSchema
 
-db_conn = connections["default"]  # will change once we migrate to neon
 
 load_dotenv()
 
@@ -206,6 +205,7 @@ def unporc_get_profile(request, customer_profile):
 
 @api.get("/db_health")
 def db_check(request):
+    db_conn = connections["default"]
     try:
         with db_conn.cursor() as cursor:
             cursor.execute("SELECT 1")
@@ -213,3 +213,7 @@ def db_check(request):
     except OperationalError as e:
         print(f"DB ERROR: {e}")  # testing purposes only
         return {"status": "DB is down"}
+
+@api.get("/health")
+def helchek(request):
+    return {"status": "RUNNING"}
