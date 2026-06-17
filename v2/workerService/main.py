@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from database import sessionLocal, Workers
 from utils.ot_gen import otp_gen
+from utils.send_mess import send_sms
 from utils.send_otp import sendOTP_SMS
 from schema import SendOTPSchema, VerifyOTPSchema, CreateSchema, CheckSchema
 load_dotenv()
@@ -112,10 +113,34 @@ def create_acc(payload: CreateSchema, db:Session=Depends(get_db)):
     db.refresh(db_note)
     return {"message": f"worker created: {db_note.id}"}
 
+@router.get("/list-workers")
+def lis_workers(db:Session=Depends(get_db)):
+    workers=db.query(Workers).all()
+    res = []
+    for worker in workers:
+        det={"gender": worker.gender, "name": worker.name, "address": worker.address, "phone": worker.phone, "worker_id": worker.worker_id, "worker_status": worker.is_active, "rating": worker.rating, "description": worker.description, "categories": worker.categories, "sub_categories": worker.sub_categories}
+        res.append(det)
+    return {"workers": res}
+
 @router.post("/get-history")
 def get_his(request: Request, db:Session=Depends(get_db)):
     pass
 
+@router.post("/details")
+async def get_det(request: Request, db:Session=Depends(get_db)):
+    try:
+        body= await request.json()
+        start_otp=body.get("start_otp")
+        customer_phone=body.get("customer_phone")
+        worker_phone=body.get("worker_phone")
+        worker=db.query(Workers).filter(Workers.phone==worker_phone).first()
+        if not worker:
+            raise HTTPException(status_code=404, detail="worker does not exist")
+        send_sms(customer_phone, worker_phone, start_otp)
+        return {"worker_name": worker.name, "worker_status": worker.is_active, "worker_id": worker.worker_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="request failed")
+        
 app.include_router(router)
 
 
