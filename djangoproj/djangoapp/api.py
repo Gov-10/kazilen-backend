@@ -117,7 +117,7 @@ def get_history(request):
 @api.post("/create-account")
 def create_account(request, payload: CreateAccountSchema):
     customer = Customer.objects.create(**payload.dict())
-    return {"message": "User created successfully", "name": customer.name}
+    return {"message": "User created successfully", "userId": customer.id}
 
 
 @api.post("/requestBooking")
