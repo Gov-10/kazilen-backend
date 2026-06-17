@@ -67,7 +67,7 @@ def verify_otp(request, payload: VerifyOTPSchema):
     logger.info(f"SESSION_TOKEN: {session_token}")
     redis_client.setex(f"session:{session_token}", 86400, payload.phone)
     logger.info("SESSION TOKEN STORED IN REDIS")
-    return {"success": True, "session": session_token}
+    return {"success": True, "session_token": session_token}
 
 
 @api.post("/check", response={200: dict, 404: dict})
@@ -75,18 +75,17 @@ def unprotected_check(request, data: phonePayload):
     valid_phone = "+91" + data.phone
     exists = Worker.objects.filter(phoneNo=valid_phone).first()
     if exists:
-        return 200, {"exists": True, "id": exists.id}
+        return 200, {"exists": True, "userId": exists.id}
     else:
         return 404, {"messg": "yo no bud"}
 
 
 class getPro(Schema):
-    userID: UUID
-
+    userId: UUID
 
 @api.post("/get-profile", auth=CustomAuth(), response=WorkerSchema)
 def get_profile(request, payload: getPro):
-    data = get_object_or_404(Worker, id=payload.userID)
+    data = get_object_or_404(Worker, id=payload.userId)
     return data
 
 
@@ -108,37 +107,43 @@ def create_worker(request, payload: CreateWorkerSchema):
 
 
 class giveSub(Schema):
-    id: UUID
+    userId: UUID
 
 
 @api.post("/getSubCat", response=list)
 def giveSubCat(request, payload: giveSub):
-    clean_id = payload.id
+    clean_id = payload.userId
     all_dat = get_object_or_404(Worker, id=clean_id)
     return all_dat.sub_categories
 
 
 class UpdateSubSchema(Schema):
-    worker_id: int
-    subcategories: dict
+    userId: UUID 
+    subCategories: dict
 
-
-@api.post("/update-subcategories")
+@api.post("/update-subCategories")
 def update_worker_subcategories(request, data: UpdateSubSchema):
-    worker = get_object_or_404(Worker, id=data.worker_id)
-    worker.subcategories = data.subcategories
-    worker.save()
+    worker = get_object_or_404(Worker, id=data.userId)
+    subCategories = worker.sub_categories
+    for cat_name, new_data in data.subCategories.items():
+        if cat_name in subCategories:
+            subCategories[cat_name].update({
+                "price": new_data.get("price", subCategories[cat_name].get("price")),
+                "details": new_data.get("details", subCategories[cat_name].get("details")),
+                "visible": new_data.get("visible", subCategories[cat_name].get("visible")),
+                })
+    worker.save(update_fields=['sub_categories'])
     return {"success": True}
 
 
 class accept_booking(Schema):
-    usr: str
+    userId: UUID
     accept: bool
 
 
 @api.post("/acceptBooking", auth=CustomAuth())
 def acceptBooking(request, payload: accept_booking):
-    worker_ = get_object_or_404(Worker, id=payload.usr)
+    worker_ = get_object_or_404(Worker, id=payload.userId)
     work = get_object_or_404(History, id=worker_.temp_id)
     customerB = work.customer
     worker_.is_working = True
@@ -158,7 +163,7 @@ def acceptBooking(request, payload: accept_booking):
 
 
 class getBooking(Schema):
-    userId: str
+    userId: UUID
 
 
 @api.post("/get-book", auth=CustomAuth())
@@ -167,11 +172,11 @@ def getbooking(request, payload: getBooking):
     return {"work": worker.work_id, "request": worker.temp_id}
 
 class getaction(Schema):
-    id : str
+    userId:UUID 
 
 @api.post("/get-action")
 def getAction(request, payload: getaction):
-    action = get_object_or_404(History, id=payload.id)
+    action = get_object_or_404(History, id=payload.userId)
     customer_ = action.customer
     return {
         "action": action.action,
@@ -182,7 +187,7 @@ def getAction(request, payload: getaction):
 
 
 class poll_this(Schema):
-    userId: str
+    userId: UUID
 
 
 @api.post("/poll", auth=CustomAuth())
@@ -194,12 +199,12 @@ def pollThis(request, payload: poll_this):
 
 
 class customer_profile(Schema):
-    user_id: str
+    userId: UUID 
 
 
 @api.post("/get_user_profile")
 def unporc_get_profile(request, customer_profile):
-    user_id = request.user_id
+    user_id = request.userId
     user = get_object_or_404(Customer, userID=user_id)
     return user
 
