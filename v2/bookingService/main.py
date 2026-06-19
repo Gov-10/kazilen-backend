@@ -82,7 +82,102 @@ def start_book(request: Request, payload:StartSchema, db:Session=Depends(get_db)
     return {"message": "work has started"}
 
 
+@app.post("/end-work")
+def end_wo(request: Request, db: Session=Depends(get_db), payload: EndSchema):
+    token=request.cookies.get("ref_token")
+    if not token:
+        raise HTTPException(status_code=404, detail="no token found")
+    pay=jwt.decode(token, "supersecret", algorithms=["HS256"])
+    customer_phone=pay.get("sub")
+    worker_phone=payload.worker_phone
+    try:
+        resp = requests.post("http://worker-service/workers/details", json={"customer_phone": customer_phone, "worker_phone": worker_phone}, timeout=5)
+        resp.raise_for_status()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="error fetching worker id")
+    resp=resp.json()
+    worker_id, worker_status=resp.get("worker_id"), resp.get("worker_status")
+    if worker_status != True:
+        raise HTTPException(status_code=403, detail="Worker not active")
+    booking_id=payload.get("booking_id")
+    if not booking_id:
+        raise HTTPException(status_code=404,detail="booking id not provided" )
+    book=db.query(Bookings).filter(Bookings.booking_id==booking_id, Bookings.worker==worker_id, Bookings.customer==customer_phone).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="no booking found")
+    book.status = "end-verification-pending"
+    db.add(book)
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="database error")
+    db.refresh(book)
+    end_otp = otp_gen()
+    key=f"{customer_phone}:{worker_phone}:end_otp"
+    hashed=hashlib.sha256(end_otp.encode()).hexdigest()
+    redis_client.setex(key, 7200, hashed)
+    return {"end_otp": end_otp, "booking_id": booking_id}
 
+@app.post("/verify-end")
+def verify_en(db: Session=Depends(get_db), request: Request, payload: EndVerifySchema):
+    token = request.cookies.get("ref_token")
+    if not token:
+        raise HTTPException(status_code=404, detail="no token found")
+    booking_id, end_otp=payload.booking_id, payload.end_otp
+    customer_phone=payload.customer_phone
+    pay=jwt.decode(token, "supersecret", algorithms=["HS256"])
+    worker_phone=pay.get("sub")
+    key=f"{customer_phone}:{worker_phone}:end_otp"
+    hashed=hashlib.sha256(end_otp.encode()).hexdigest()
+    ot=redis_client.get(key)
+    if hashed != ot:
+        raise HTTPException(status_code=401, detail="otp does not match")
+    book= db.query(Bookings).filter(Bookings.booking_id==booking_id, Bookings.customer==customer_phone)
+    book.status="completed"
+    book.end_time=datetime.utcnow()
+    db.add(book)
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="database error")
+    db.refresh(book)
+    #TODO: worker db state updation
+    return {"message": "Customer says thank you for your service"}
+
+@app.post("/feedback")
+def feedb(request: Request, payload: FeedbackSchema, db:Session=Depends(get_db)):
+    token=request.cookies.get("ref_token")
+    if not token:
+        raise HTTPException(status_code=404, detail="no token found")
+    rating, feedback=payload.rating, payload.feedback
+    booking_id=payload.booking_id
+    pay=jwt.decode(token, "supersecret", algorithms=["HS256"])
+    customer_phone=pay.get("sub")
+    book=db.query(Bookings).filter(Bookings.booking_id==booking_id, Bookings.customer==customer_phone).first()
+    book.rating=rating
+    book.feeback=feedback
+    db.add(book)
+    try:
+        db.commit()
+    except Excepion as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="database error")
+    db.refresh(book)
+    return {"message": "thank you for your valuable feedback"}
+
+
+
+
+
+    
+
+
+
+
+
+    
 
 
 
