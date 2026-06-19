@@ -130,13 +130,14 @@ def get_his(request: Request, db:Session=Depends(get_db)):
 async def get_det(request: Request, db:Session=Depends(get_db)):
     try:
         body= await request.json()
-        start_otp=body.get("start_otp")
+        start_otp=body.get("start_otp", None)
         customer_phone=body.get("customer_phone")
         worker_phone=body.get("worker_phone")
+        if start_otp is not None:
+            send_sms(customer_phone, worker_phone, start_otp)
         worker=db.query(Workers).filter(Workers.phone==worker_phone).first()
         if not worker:
             raise HTTPException(status_code=404, detail="worker does not exist")
-        send_sms(customer_phone, worker_phone, start_otp)
         return {"worker_name": worker.name, "worker_status": worker.is_active, "worker_id": worker.worker_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail="request failed")
