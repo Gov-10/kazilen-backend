@@ -16,7 +16,7 @@ class Workers(Base):
     address=Column(String)
     phone=Column(String)
     image_id=Column(String, nullable=True)
-    worker_id=Column(Uuid)
+    worker_id=Column(String)
     is_working=Column(Boolean, default=False)
     is_active=Column(Boolean, default=True)
     dob=Column(DateTime)

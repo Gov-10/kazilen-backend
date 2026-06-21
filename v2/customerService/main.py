@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from database import sessionLocal, Customers
 load_dotenv()
 import logging
-
+JWT_SECRET= os.getenv("JWT_SECRET")
 def get_db():
     db=sessionLocal()
     try:
@@ -38,7 +38,7 @@ def chek():
 def send_otp(payload: SendOTPSchema):
     phone=payload.phone
     otp= otp_gen()
-    logger.info(json.dumps({"event": "otp_generated", "otp": otp}))
+    logger.info(json.dumps({"event": "otp_generated"}))
     hashed=hashlib.sha256(otp.encode()).hexdigest()
     redis_client.setex(f"otp:{phone}", 600, hashed)
     logger.info(json.dumps({"event": "otp_stored"}))
@@ -55,17 +55,17 @@ def verify_otp(payload: VerifyOTPSchema):
     ot=payload.otp
     input_hash=hashlib.sha256(ot.encode()).hexdigest()
     if input_hash != stored:
-        logger.error(json.dumps({"event": "invalid_otp", "otp": ot}))
+        logger.error(json.dumps({"event": "invalid_otp"}))
         raise HTTPException(status_code=401, detail="wrong OTP entered")
     pay= {"iss": "kazilen-auth", "sub":payload.phone, "exp": datetime.utcnow()+timedelta(seconds=600)}
-    token= jwt.encode(pay, "supersecret", algorithms=["HS256"])
+    token= jwt.encode(pay, JWT_SECRET, algorithms=["HS256"])
     redis_client.delete(key)
     return {"token": token}
 
 @router.post("/check")
 def db_check(response: Response, payload: CheckSchema, db: Session=Depends(get_db)):
     token=payload.token
-    pay =jwt.decode(token, "supersecret", algorithms=["HS256"])
+    pay =jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     phone=pay.get("sub")
     valid_phone = phone
     cus= db.query(Customers).filter(Customers.phone==valid_phone).first()
@@ -73,7 +73,7 @@ def db_check(response: Response, payload: CheckSchema, db: Session=Depends(get_d
         logger.error(json.dumps({"event": "user_not_found", "phone": valid_phone}))
         raise HTTPException(status_code=404, detail="User not found")
     payl={"iss": "kazilen-auth", "sub": phone, "exp": datetime.utcnow()+timedelta(days=7)}
-    ref_token=jwt.encode(payl, "supersecret", algorithms=["HS256"])
+    ref_token=jwt.encode(payl, JWT_SECRET, algorithms=["HS256"])
     response.set_cookie(key="ref_token",value=ref_token, httponly=True, secure=True, samesite="lax", max_age=604800)
     logger.info(json.dumps({"event": "token_set", "message": "refresh token set in cookies"}))
     return {"message": "user found ji..."}
@@ -84,7 +84,7 @@ def get_profile(request: Request, db:Session=Depends(get_db)):
     if not token:
         logger.error(json.dumps({"event": "token_not_found"}))
         raise HTTPException(status_code=401, detail="no tokens found")
-    pay=jwt.decode(token, "supersecret", algorithms=["HS256"])
+    pay=jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     phone=pay.get("sub")
     cus=db.query(Customers).filter(Customers.phone==phone).first()
     if not cus:
@@ -106,6 +106,12 @@ def create_acc(payload: CreateSchema, db:Session=Depends(get_db)):
     name, phone=payload.name, payload.phone
     address=payload.address
     gender, dob=payload.gender, payload.dob
+    custo = db.query(Customers).filter(Customers.phone==phone).first()
+    if custo:
+        logger.warning(json.dumps({"event": "duplicate_attempt", "phone": phone}))
+        raise HTTPException(status_code=409, detail="customer already exists")
+    if not custo:
+        pass
     db_note=Customers(name=name, phone=phone, gender=gender, dob=dob, address=address)
     db.add(db_note)
     try:

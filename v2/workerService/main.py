@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request, Response, Depends, APIRouter
 from sqlalchemy.orm import Session
-import os, json, hashlib, jwt
+import os, json, hashlib, jwt, uuid
 from redis import Redis
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -13,6 +13,7 @@ load_dotenv()
 import logging
 app=FastAPI()
 router=APIRouter(prefix="/workers")
+JWT_SECRET= os.getenv("JWT_SECRET")
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger=logging.getLogger("worker")
@@ -28,11 +29,11 @@ def get_db():
 def chek():
     return {"status": "Running"}
 
-@router.get("/send-otp")
+@router.post("/send-otp")
 def send_otp(payload: SendOTPSchema):
     phone=payload.phone
     otp= otp_gen()
-    logger.info(json.dumps({"event": "otp_generated", "otp": otp}))
+    logger.info(json.dumps({"event": "otp_generated"}))
     hashed=hashlib.sha256(otp.encode()).hexdigest()
     redis_client.setex(f"otp:{phone}", 600, hashed)
     logger.info(json.dumps({"event": "otp_stored"}))
@@ -49,25 +50,25 @@ def verify_otp(payload: VerifyOTPSchema):
     ot=payload.otp
     input_hash=hashlib.sha256(ot.encode()).hexdigest()
     if input_hash != stored:
-        logger.error(json.dumps({"event": "invalid_otp", "otp": ot}))
+        logger.error(json.dumps({"event": "invalid_otp"}))
         raise HTTPException(status_code=401, detail="wrong OTP entered")
     pay= {"iss": "kazilen-auth", "sub":payload.phone, "exp": datetime.utcnow()+timedelta(seconds=600)}
-    token= jwt.encode(pay, "supersecret", algorithms=["HS256"])
+    token= jwt.encode(pay, JWT_SECRET, algorithms=["HS256"])
     redis_client.delete(key)
     return {"token": token}
 
 @router.post("/check")
 def db_check(response: Response, payload: CheckSchema, db: Session=Depends(get_db)):
     token=payload.token
-    pay =jwt.decode(token, "supersecret", algorithms=["HS256"])
+    pay =jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     phone=pay.get("sub")
     valid_phone = phone
     cus= db.query(Workers).filter(Workers.phone==valid_phone).first()
     if not cus:
         logger.error(json.dumps({"event": "user_not_found", "phone": valid_phone}))
         raise HTTPException(status_code=404, detail="User not found")
-    payl={"iss": "kazilen-auth", "sub": phone, "exp": datetime.utcnow()+timedelta(days=7)}
-    ref_token=jwt.encode(payl, "supersecret", algorithms=["HS256"])
+    payl={"iss": "kazilen-auth", "sub": cus.worker_id, "exp": datetime.utcnow()+timedelta(days=7)}
+    ref_token=jwt.encode(payl, JWT_SECRET, algorithms=["HS256"])
     response.set_cookie(key="ref_token",value=ref_token, httponly=True, secure=True, samesite="lax", max_age=604800)
     logger.info(json.dumps({"event": "token_set", "message": "refresh token set in cookies"}))
     return {"message": "user found ji..."}
@@ -78,11 +79,11 @@ def get_profile(request: Request, db:Session=Depends(get_db)):
     if not token:
         logger.error(json.dumps({"event": "token_not_found"}))
         raise HTTPException(status_code=401, detail="no tokens found")
-    pay=jwt.decode(token, "supersecret", algorithms=["HS256"])
-    phone=pay.get("sub")
-    cus=db.query(Workers).filter(Workers.phone==phone).first()
+    pay=jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+    worker_id=pay.get("sub")
+    cus=db.query(Workers).filter(Workers.worker_id==worker_id).first()
     if not cus:
-        logger.error(json.dumps({"event": "customer not found", "phone": phone}))
+        logger.error(json.dumps({"event": "worker not found", "worker_id": worker_id}))
         raise HTTPException(status_code=404, detail="user not found")
     return {"gender": cus.gender, "name": cus.name, "address": cus.address, "phone": cus.phone, "dob": cus.dob, "rating": cus.rating, "categories": cus.categories, "sub_categories": cus.sub_categories}
 
@@ -101,7 +102,14 @@ def create_acc(payload: CreateSchema, db:Session=Depends(get_db)):
     address, phone=payload.address, payload.phone
     dob, categories=payload.dob, payload.categories
     sub_categories=payload.sub_categories
-    db_note=Workers(gender=gender, name=name, address=address, phone=phone, dob=dob, categories=categories, sub_categories=sub_categories)
+    worker_id = str(uuid.uuid4())
+    wor = db.query(Workers).filter(Workers.phone==phone).first()
+    if wor:
+        logger.info(json.dumps({"event": "duplicate_worker_attempt", "phone": phone}))
+        raise HTTPException(status_code=409, detail="worker already exists")
+    if not wor:
+        pass
+    db_note=Workers(gender=gender,worker_id=worker_id,  name=name, address=address, phone=phone, dob=dob, categories=categories, sub_categories=sub_categories)
     db.add(db_note)
     try:
         db.commit()
@@ -111,7 +119,7 @@ def create_acc(payload: CreateSchema, db:Session=Depends(get_db)):
         logger.error(json.dumps({"event": "db_error", "error": str(e)}))
         raise HTTPException(status_code=500, detail="database error")
     db.refresh(db_note)
-    return {"message": f"worker created: {db_note.id}"}
+    return {"message": f"worker created: {db_note.worker_id}"}
 
 @router.get("/list-workers")
 def lis_workers(db:Session=Depends(get_db)):
@@ -132,13 +140,11 @@ async def get_det(request: Request, db:Session=Depends(get_db)):
         body= await request.json()
         start_otp=body.get("start_otp", None)
         customer_phone=body.get("customer_phone")
-        worker_phone=body.get("worker_phone")
-        if start_otp is not None:
-            send_sms(customer_phone, worker_phone, start_otp)
-        worker=db.query(Workers).filter(Workers.phone==worker_phone).first()
+        worker_id = body.get("worker_id")
+        worker=db.query(Workers).filter(Workers.worker_id==worker_id).first()
         if not worker:
             raise HTTPException(status_code=404, detail="worker does not exist")
-        return {"worker_name": worker.name, "worker_status": worker.is_active, "worker_id": worker.worker_id}
+        return {"worker_name": worker.name, "worker_status": worker.is_active, "worker_id": worker.worker_id, "worker_phone": worker.phone}
     except Exception as e:
         raise HTTPException(status_code=500, detail="request failed")
 
@@ -177,8 +183,13 @@ async def status_up(request: Request, db:Session=Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail="error fetching request")
 
+@router.get("/get-worker/{worker_id}")
+def get_work(worker_id: str, db:Session=Depends(get_db)):
+    work= db.query(Workers).filter(Workers.worker_id==worker_id).first()
+    if not work:
+        raise HTTPException(status_code=404, detail="no worker found")
+    return {"name": work.name, "gender": work.gender, "address": work.address, "phone": work.phone, "worker_id": work.worker_id, "is_working": work.is_working, "is_active": work.is_active, "rating": work.rating, "description": work.description, "categories": work.categories, "sub_categories": work.sub_categories}
 
-        
 app.include_router(router)
 
 
