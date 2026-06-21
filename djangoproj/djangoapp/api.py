@@ -1,3 +1,4 @@
+import uuid
 from django.db.models import Q, BooleanField, QuerySet
 from twilio.rest.ip_messaging.v2.service import channel
 from typing_extensions import List
@@ -99,7 +100,7 @@ def unprotected_check(request, data: phonePayload):
         return 404, {"messg": "yo no bud"}
 
 class userIdGETTT(Schema):
-    userId: str
+    userId: uuid.UUID 
 
 @api.post("/get-profile", auth=CustomAuth(), response=CustomerSchema)
 def get_profile(request, payload : userIdGETTT):
