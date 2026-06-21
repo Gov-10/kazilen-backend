@@ -68,7 +68,7 @@ def book_worker(request: Request, payload: BookSchema, db:Session=Depends(get_db
 @app.post("/start-work")
 def start_book(request: Request, payload:StartSchema, db:Session=Depends(get_db)):
     start_otp, customer_phone=payload.start_otp, payload.customer_phone
-    booking_id=payload.booking_id
+    booking_id, worker_id=payload.booking_id, payload.worker_id
     token=request.cookies.get("ref_token")
     if not token:
         logger.warning(json.dumps({"event": "token_not_found"}))
@@ -92,7 +92,11 @@ def start_book(request: Request, payload:StartSchema, db:Session=Depends(get_db)
         logger.error(json.dumps({"event":"db_error", "error": str(e)}))
         raise HTTPException(status_code=500, detail="database error")
     db.refresh(book)
-    #TODO: Workers status update in db
+    try:
+        resp=requests.post("http://worker-service/workers/status-update",json={"status": book.status, "worker_id": worker_id}, timeout=5 )
+        resp.raise_for_status()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="error fetching")
     return {"message": "work has started"}
 
 
@@ -171,6 +175,11 @@ def verify_en(db: Session=Depends(get_db), request: Request, payload: EndVerifyS
         raise HTTPException(status_code=500, detail="database error")
     db.refresh(book)
     #TODO: worker db state updation
+    try:
+        resp=requests.post("http://worker-service/workers/status-update",json={"status": book.status, "worker_id": worker_id}, timeout=5 )
+        resp.raise_for_status()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="error fetching")
     return {"message": "Customer says thank you for your service"}
 
 @app.post("/feedback")
