@@ -141,6 +141,43 @@ async def get_det(request: Request, db:Session=Depends(get_db)):
         return {"worker_name": worker.name, "worker_status": worker.is_active, "worker_id": worker.worker_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail="request failed")
+
+@router.post("/status-update")
+async def status_up(request: Request, db:Session=Depends(get_db)):
+    try:
+        body = await request.json()
+        worker_id = body.get("worker_id")
+        status=body.get("status")
+        if worker_id is None:
+            raise HTTPException(status_code=404, detail="no worrker id provided")
+        worker=db.query(Workers).filter(Workers.worker_id == worker_id).first()
+        if not worker:
+            raise HTTPException(status_code=404, detail="no worker found")
+        if not worker.is_active:
+            raise HTTPException(status_code=403, detail="worker is not active")
+        if status == "in-progress":
+            worker.is_working=True
+            db.add(worker)
+            try:
+                db.commit()
+                return {"message": "worker status updated"}
+            except Exception as e:
+                db.rollback()
+                raise HTTPException(status_code=500, detail="database error")
+        if status == "completed":
+            worker.is_working=False
+            db.add(worker)
+            try:
+                db.commit()
+                return {"message": "worker status updated"}
+            except Exception as e:
+                db.rollback()
+                raise HTTPException(status_code=500, detail="database error")
+        raise HTTPException(status_code=404, detail="status not valid")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="error fetching request")
+
+
         
 app.include_router(router)
 
