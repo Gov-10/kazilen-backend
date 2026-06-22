@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import List
 class SendOTPSchema(BaseModel):
     phone:str
 
@@ -17,4 +18,4 @@ class CreateSchema(BaseModel):
     phone:str
     dob:datetime
     categories:str
-    sub_categories:str
+    sub_categories:List[str]
