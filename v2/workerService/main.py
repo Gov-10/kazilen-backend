@@ -30,7 +30,7 @@ RequestsInstrumentor().instrument()
 JWT_SECRET= os.getenv("JWT_SECRET")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger=logging.getLogger("worker")
-redis_client=Redis(host=os.getenv("REDIS_URL"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"), decode_responses=True)
+redis_client=Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"), decode_responses=True)
 def get_db():
     db=sessionLocal()
     try:
@@ -107,7 +107,7 @@ def get_profile(request: Request, db:Session=Depends(get_db)):
     return {"gender": cus.gender, "name": cus.name, "address": cus.address, "phone": cus.phone, "dob": cus.dob, "rating": cus.rating, "categories": cus.categories, "sub_categories": cus.sub_categories}
 
 @router.post("/logout")
-def logou(request: Request, db:Session=Depends(get_db), response: Response):
+def logou(request: Request, response: Response, db:Session=Depends(get_db)):
     token=request.cookies.get("ref_token")
     if not token:
         logger.error(json.dumps({"event": "token_not_found"}))

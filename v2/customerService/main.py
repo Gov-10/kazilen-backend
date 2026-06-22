@@ -39,7 +39,7 @@ RequestsInstrumentor().instrument()
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger=logging.getLogger("customer")
 redis_client = Redis(
-    host=os.getenv("REDIS_URL"),
+    host=os.getenv("REDIS_HOST"),
     port=int(os.getenv("REDIS_PORT")),
     password=os.getenv("REDIS_PASSWORD"),
     decode_responses=True,
@@ -115,7 +115,7 @@ def get_profile(request: Request, db:Session=Depends(get_db)):
     return {"gender": cus.gender, "name": cus.name, "phone": cus.phone, "dob": cus.dob, "address": cus.address}
 
 @router.post("/logout")
-def logou(request: Request, db:Session=Depends(get_db), response: Response):
+def logou(request: Request, response: Response, db:Session=Depends(get_db)):
     token=request.cookies.get("ref_token")
     if not token:
         logger.error(json.dumps({"event": "token_not_found"}))
