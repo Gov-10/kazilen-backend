@@ -9,6 +9,10 @@ logger=logging.getLogger("booking")
 from metric import HEALTH_CHECKS, BOOKINGS_CREATED, START_OTP_COUNT, START_SMS, ACTIVE_BOOKINGS, VERIFICATION_PENDING_BOOKINGS, END_OTP, COMPLETED_BOOKINGS, BOOKING_DURATION
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from redis import Redis 
 from utils.otp_gen import gen_otp
@@ -18,6 +22,10 @@ load_dotenv()
 redis_client=Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"), decode_responses=True)
 JWT_SECRET= os.getenv("JWT_SECRET")
 app=FastAPI()
+trace.set_tracer_provider(TracerProvider())
+span_processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://otel-collector:4317",insecure=True)
+)
+trace.get_tracer_provider().add_span_processor(span_processor)
 FastAPIInstrumentor.instrument_app(app)
 RequestsInstrumentor().instrument()
 def get_db():

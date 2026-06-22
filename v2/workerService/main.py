@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request, Response, Depends, APIRouter
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 import os, json, hashlib, jwt, uuid
 from redis import Redis
 from datetime import datetime, timedelta
@@ -12,14 +13,21 @@ from utils.send_otp import sendOTP_SMS
 from schema import SendOTPSchema, VerifyOTPSchema, CreateSchema, CheckSchema
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from metric import VERIF_OTP, OTP_ERRORS
 load_dotenv()
 import logging
 app=FastAPI()
 router=APIRouter(prefix="/workers")
+trace.set_tracer_provider(TracerProvider())
+span_processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://otel-collector:4317",insecure=True))
+trace.get_tracer_provider().add_span_processor(span_processor)
 FastAPIInstrumentor.instrument_app(app)
 RequestsInstrumentor().instrument()
 JWT_SECRET= os.getenv("JWT_SECRET")
-
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger=logging.getLogger("worker")
 redis_client=Redis(host=os.getenv("REDIS_URL"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"), decode_responses=True)
