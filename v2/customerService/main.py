@@ -128,6 +128,20 @@ def create_acc(payload: CreateSchema, db:Session=Depends(get_db)):
 def get_his(request: Request, db:Session=Depends(get_db)):
     pass
 
+@router.get("/health")
+def db_chek(db:Session=Depends(get_db)):
+    db_status, redis_status= "up", "up"
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        db_status = "down"
+    try:
+        redis_client.ping()
+    except Exception:
+        redis_status="down"
+    overall = "healthy" if db_status=="up" and redis_status=="up" else "degraded"
+    return {"overall": overall, "db_status": db_status, "redis_status": redis_status}
+
 
 app.include_router(router)
 

@@ -190,6 +190,20 @@ def get_work(worker_id: str, db:Session=Depends(get_db)):
         raise HTTPException(status_code=404, detail="no worker found")
     return {"name": work.name, "gender": work.gender, "address": work.address, "phone": work.phone, "worker_id": work.worker_id, "is_working": work.is_working, "is_active": work.is_active, "rating": work.rating, "description": work.description, "categories": work.categories, "sub_categories": work.sub_categories}
 
+@router.get("/health")
+def db_chek(db:Session=Depends(get_db)):
+    db_status, redis_status= "up", "up"
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        db_status = "down"
+    try:
+        redis_client.ping()
+    except Exception:
+        redis_status="down"
+    overall = "healthy" if db_status=="up" and redis_status=="up" else "degraded"
+    return {"overall": overall, "db_status": db_status, "redis_status": redis_status}
+
 app.include_router(router)
 
 
