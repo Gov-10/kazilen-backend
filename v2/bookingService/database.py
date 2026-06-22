@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Uuid
 from sqlalchemy.orm import declarative_base, sessionmaker
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 import os
 from dotenv import load_dotenv()
 load_dotenv()
@@ -21,4 +22,5 @@ class Bookings(Base):
     feedback=Column(String, default="No feedback")
 
 Base.metadata.create_all(bind=engine)
+SQLAlchemyInstrumentor().instrument(engine=engine)
 

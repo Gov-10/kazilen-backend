@@ -1,11 +1,15 @@
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends, Request, Response
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+from sqlalchemy import text, func
 from database import sessionLocal, Bookings
 import os, jwt, uuid, hashlib, requests, logging, json
 from utils.mess_send import send_sms
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger=logging.getLogger("booking")
+from metric import HEALTH_CHECKS, BOOKINGS_CREATED, START_OTP_COUNT, START_SMS, ACTIVE_BOOKINGS, VERIFICATION_PENDING_BOOKINGS, END_OTP, COMPLETED_BOOKINGS, BOOKING_DURATION
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from redis import Redis 
 from utils.otp_gen import gen_otp
 from datetime import datetime
@@ -14,6 +18,8 @@ load_dotenv()
 redis_client=Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"), decode_responses=True)
 JWT_SECRET= os.getenv("JWT_SECRET")
 app=FastAPI()
+FastAPIInstrumentor.instrument_app(app)
+RequestsInstrumentor().instrument()
 def get_db():
     db=sessionLocal()
     try:
@@ -25,8 +31,13 @@ def get_db():
 def chek():
     return {"status": "Running"}
 
+@app.get("/metrics")
+def metrics():
+    return Response(generate_latest(),media_type=CONTENT_TYPE_LATEST)
+
 @app.get("/health")
 def db_chek(db:Session=Depends(get_db)):
+    HEALTH_CHECKS.inc()
     db_status, redis_status= "up", "up"
     try:
         db.execute(text("SELECT 1"))
@@ -56,6 +67,7 @@ def book_worker(request: Request, payload: BookSchema, db:Session=Depends(get_db
     worker_id=payload.worker_id
     booking_id=str(uuid.uuid4())
     start_otp=gen_otp()
+    START_OTP_COUNT.inc()
     db_note=Bookings(booking_id=booking_id, customer=customer_phone, worker=worker_id, start_time=datetime.utcnow(), action=payload.action)
     db.add(db_note)
     try:
@@ -66,7 +78,9 @@ def book_worker(request: Request, payload: BookSchema, db:Session=Depends(get_db
         logger.error(json.dumps({"event": "db_error", "error": str(e)}))
         raise HTTPException(status_code=500, detail="database error")
     db.refresh(db_note)
+    BOOKINGS_CREATED.inc()
     send_sms(customer_phone, worker_phone)
+    START_SMS.inc()
     hashed=hashlib.sha256(start_otp.encode()).hexdigest()
     redis_client.setex(f"{customer_phone}:{worker_id}:otp", 7200, hashed)
     logger.info(json.dumps({"event": "start_otp_set_in_redis"}))
@@ -102,6 +116,8 @@ def start_book(request: Request, payload:StartSchema, db:Session=Depends(get_db)
         logger.error(json.dumps({"event":"db_error", "error": str(e)}))
         raise HTTPException(status_code=500, detail="database error")
     db.refresh(book)
+    active_bookings=db.query(func.count(Bookings.id)).filter(Bookings.status=="in-progress").scalar()
+    ACTIVE_BOOKINGS.set(active_bookings)
     try:
         resp=requests.post("http://worker-service/workers/status-update",json={"status": book.status, "worker_id": worker_id}, timeout=5 )
         resp.raise_for_status()
@@ -139,7 +155,10 @@ def end_wo(request: Request, db: Session=Depends(get_db), payload: EndSchema):
         logger.error(json.dumps({"event": "db_error", "error": str(e)}))
         raise HTTPException(status_code=500, detail="database error")
     db.refresh(book)
+    verif=db.query(func.count(Bookings.id)).filter(Bookings.status=="end-verification-pending").scalar()
+    VERIFICATION_PENDING_BOOKINGS.set(verif)
     end_otp = gen_otp()
+    END_OTP.inc()
     key=f"{customer_phone}:{worker_id}:end_otp"
     hashed=hashlib.sha256(end_otp.encode()).hexdigest()
     redis_client.setex(key, 7200, hashed)
@@ -177,6 +196,12 @@ def verify_en(db: Session=Depends(get_db), request: Request, payload: EndVerifyS
         logger.error(json.dumps({"event": "db_error", "error": str(e)}))
         raise HTTPException(status_code=500, detail="database error")
     db.refresh(book)
+    comp=db.query(func.count(Bookings.id)).filter(Bookings.status=="completed").scalar()
+    COMPLETED_BOOKINGS.inc()
+    VERIFICATION_PENDING_BOOKINGS.dec()
+    ACTIVE_BOOKINGS.dec()
+    duration = (book.end_time - book.start_time).total_seconds()
+    BOOKING_DURATION.observe(duration)
     #TODO: worker db state updation
     try:
         resp=requests.post("http://worker-service/workers/status-update",json={"status": book.status, "worker_id": worker_id}, timeout=5 )
