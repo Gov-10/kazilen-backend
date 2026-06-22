@@ -10,10 +10,14 @@ from utils.ot_gen import otp_gen
 from utils.send_mess import send_sms
 from utils.send_otp import sendOTP_SMS
 from schema import SendOTPSchema, VerifyOTPSchema, CreateSchema, CheckSchema
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
 load_dotenv()
 import logging
 app=FastAPI()
 router=APIRouter(prefix="/workers")
+FastAPIInstrumentor.instrument_app(app)
+RequestsInstrumentor().instrument()
 JWT_SECRET= os.getenv("JWT_SECRET")
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")

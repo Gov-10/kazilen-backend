@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, func, Boolean, Uuid
 from sqlalchemy.orm import declarative_base, sessionmaker
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -17,6 +18,9 @@ class Customers(Base):
     phone=Column(String, unique=True, primary_key=True)
     dob=Column(DateTime)
     address=Column(String)
+
+Base.metadata.create_all(bind=engine)
+SQLAlchemyInstrumentor().instrument(engine=engine)
 
 
 

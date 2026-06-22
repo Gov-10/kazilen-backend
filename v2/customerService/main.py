@@ -7,6 +7,8 @@ from utils.ot_gen import otp_gen
 from utils.send_otp import sendOTP_SMS
 from datetime import datetime, timedelta
 from schema import SendOTPSchema, VerifyOTPSchema, CheckSchema, CreateSchema
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from dotenv import load_dotenv
 from metric import VERIF_OTP, OTP_SMS, OTP_ERRORS
 from database import sessionLocal, Customers
@@ -23,6 +25,8 @@ def get_db():
 
 app=FastAPI()
 router = APIRouter(prefix="/customers")
+FastAPIInstrumentor.instrument_app(app)
+RequestsInstrumentor().instrument()
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger=logging.getLogger("customer")
 redis_client = Redis(

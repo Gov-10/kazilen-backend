@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, Uuid, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -26,5 +27,6 @@ class Workers(Base):
     sub_categories=Column(String, default='fan repair')
 
 Base.metadata.create_all(bind=engine)
+SQLAlchemyInstrumentor().instrument(engine=engine)
     
 

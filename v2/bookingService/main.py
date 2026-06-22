@@ -7,6 +7,8 @@ from utils.mess_send import send_sms
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger=logging.getLogger("booking")
 from metric import HEALTH_CHECKS, BOOKINGS_CREATED, START_OTP_COUNT, START_SMS, ACTIVE_BOOKINGS, VERIFICATION_PENDING_BOOKINGS, END_OTP, COMPLETED_BOOKINGS, BOOKING_DURATION
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from redis import Redis 
 from utils.otp_gen import gen_otp
@@ -16,6 +18,8 @@ load_dotenv()
 redis_client=Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"), decode_responses=True)
 JWT_SECRET= os.getenv("JWT_SECRET")
 app=FastAPI()
+FastAPIInstrumentor.instrument_app(app)
+RequestsInstrumentor().instrument()
 def get_db():
     db=sessionLocal()
     try:
