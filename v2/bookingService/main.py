@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, Request, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import text, func
 from database import sessionLocal, Bookings
-import os, jwt, uuid, hashlib, requests, logging, json
+import os, jwt, uuid, hashlib, requests, logging, json, time
 from utils.mess_send import send_sms
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger=logging.getLogger("booking")
@@ -30,6 +30,17 @@ def get_db():
 @app.get("/")
 def chek():
     return {"status": "Running"}
+
+@app.middleware("http")
+async def middle(request: Request, call_next):
+    start = time.time()
+    resp = await call_next(request)
+    duration = round(time.time() - start, 3)
+    if request.url.path == '/metrics':
+        return resp
+    logger.info(json.dumps({"event": "http_method", "method": request.method, "path": request.url.path, "status_code": resp.status_code, "duration": duration}))
+    return resp
+
 
 @app.get("/metrics")
 def metrics():
@@ -196,7 +207,6 @@ def verify_en(db: Session=Depends(get_db), request: Request, payload: EndVerifyS
         logger.error(json.dumps({"event": "db_error", "error": str(e)}))
         raise HTTPException(status_code=500, detail="database error")
     db.refresh(book)
-    comp=db.query(func.count(Bookings.id)).filter(Bookings.status=="completed").scalar()
     COMPLETED_BOOKINGS.inc()
     VERIFICATION_PENDING_BOOKINGS.dec()
     ACTIVE_BOOKINGS.dec()
