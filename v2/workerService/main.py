@@ -72,7 +72,7 @@ def verify_otp(payload: VerifyOTPSchema):
         logger.error(json.dumps({"event": "invalid_otp"}))
         raise HTTPException(status_code=401, detail="wrong OTP entered")
     pay= {"iss": "kazilen-auth", "sub":payload.phone, "exp": datetime.utcnow()+timedelta(seconds=600)}
-    token= jwt.encode(pay, JWT_SECRET, algorithms=["HS256"])
+    token= jwt.encode(pay, JWT_SECRET, algorithm="HS256")
     redis_client.delete(key)
     return {"token": token}
 
@@ -87,7 +87,7 @@ def db_check(response: Response, payload: CheckSchema, db: Session=Depends(get_d
         logger.error(json.dumps({"event": "user_not_found", "phone": valid_phone}))
         raise HTTPException(status_code=404, detail="User not found")
     payl={"iss": "kazilen-auth", "sub": cus.worker_id, "exp": datetime.utcnow()+timedelta(days=7)}
-    ref_token=jwt.encode(payl, JWT_SECRET, algorithms=["HS256"])
+    ref_token=jwt.encode(payl, JWT_SECRET, algorithm="HS256")
     response.set_cookie(key="ref_token",value=ref_token, httponly=True, secure=True, samesite="lax", max_age=604800)
     logger.info(json.dumps({"event": "token_set", "message": "refresh token set in cookies"}))
     return {"message": "user found ji..."}
