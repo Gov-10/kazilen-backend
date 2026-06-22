@@ -11,5 +11,5 @@ COMPANY_NUMBER = os.getenv("COMPANY_NUMBER")
 def send_sms(customer_phone, worker_phone):
      try:
         client.messages.create(body=f"You have been assigned task, customer phone: {customer_phone}", from_=COMPANY_NUMBER, to=f'+{worker_phone}')
-    except:
-        print("error ji")
+     except:
+         print("error ji")

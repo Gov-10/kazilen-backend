@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime, Uuid
 from sqlalchemy.orm import declarative_base, sessionmaker
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 import os
-from dotenv import load_dotenv()
+from dotenv import load_dotenv
 load_dotenv()
 DATABASE_URL=os.getenv("DATABASE_URL")
 engine=create_engine(DATABASE_URL)

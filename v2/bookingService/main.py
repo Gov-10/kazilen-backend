@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, Request, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import text, func
 from database import sessionLocal, Bookings
+from schema import BookSchema, StartSchema, EndSchema, EndVerifySchema, FeedbackSchema
 import os, jwt, uuid, hashlib, requests, logging, json, time
 from utils.mess_send import send_sms
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -148,7 +149,7 @@ def start_book(request: Request, payload:StartSchema, db:Session=Depends(get_db)
 
 # accessible from customer side
 @app.post("/end-work")
-def end_wo(request: Request, db: Session=Depends(get_db), payload: EndSchema):
+def end_wo(request: Request, payload: EndSchema, db: Session=Depends(get_db)):
     token=request.cookies.get("ref_token")
     if not token:
         logger.info(json.dumps({"event": "token_not_found"}))
@@ -186,7 +187,7 @@ def end_wo(request: Request, db: Session=Depends(get_db), payload: EndSchema):
 
 # accessible from worker side
 @app.post("/verify-end")
-def verify_en(db: Session=Depends(get_db), request: Request, payload: EndVerifySchema):
+def verify_en(request: Request, payload: EndVerifySchema, db:Session=Depends(get_db)):
     token = request.cookies.get("ref_token")
     if not token:
         logger.info(json.dumps({"event": "token_not_found"}))

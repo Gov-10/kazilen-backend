@@ -22,7 +22,7 @@ class Workers(Base):
     is_active=Column(Boolean, default=True)
     dob=Column(DateTime)
     rating=Column(Integer, default=0)
-    description=Column(String, max_length=250, nullable=True)
+    description=Column(String, nullable=True)
     categories=Column(String, default='electrician')
     sub_categories=Column(String, default='fan repair')
 
