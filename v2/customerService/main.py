@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Response, Request, APIRouter, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 import os, json, hashlib, jwt
 from redis import Redis
 from utils.ot_gen import otp_gen
@@ -9,6 +10,10 @@ from datetime import datetime, timedelta
 from schema import SendOTPSchema, VerifyOTPSchema, CheckSchema, CreateSchema
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from dotenv import load_dotenv
 from metric import VERIF_OTP, OTP_SMS, OTP_ERRORS
 from database import sessionLocal, Customers
@@ -25,6 +30,10 @@ def get_db():
 
 app=FastAPI()
 router = APIRouter(prefix="/customers")
+trace.set_tracer_provider(TracerProvider())
+span_processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://otel-collector:4317",insecure=True)
+)
+trace.get_tracer_provider().add_span_processor(span_processor)
 FastAPIInstrumentor.instrument_app(app)
 RequestsInstrumentor().instrument()
 logging.basicConfig(level=logging.INFO, format="%(message)s")
