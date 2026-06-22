@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from database import sessionLocal, Bookings
 import os, jwt, uuid, hashlib, requests, logging, json
 from utils.mess_send import send_sms
@@ -23,6 +24,20 @@ def get_db():
 @app.get("/")
 def chek():
     return {"status": "Running"}
+
+@app.get("/health")
+def db_chek(db:Session=Depends(get_db)):
+    db_status, redis_status= "up", "up"
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        db_status = "down"
+    try:
+        redis_client.ping()
+    except Exception:
+        redis_status="down"
+    overall = "healthy" if db_status=="up" and redis_status=="up" else "degraded"
+    return {"overall": overall, "db_status": db_status, "redis_status": redis_status}
 
 #accessible from customer side
 @app.post("/book")
