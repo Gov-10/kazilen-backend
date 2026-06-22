@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request, Response, Depends, APIRouter
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from sqlalchemy.orm import Session
 import os, json, hashlib, jwt, uuid
 from redis import Redis
@@ -29,6 +30,10 @@ def get_db():
 def chek():
     return {"status": "Running"}
 
+@router.get("/metrics")
+def metrics():
+    return Response(generate_latest(),media_type=CONTENT_TYPE_LATEST)
+
 @router.post("/send-otp")
 def send_otp(payload: SendOTPSchema):
     phone=payload.phone
@@ -38,6 +43,7 @@ def send_otp(payload: SendOTPSchema):
     redis_client.setex(f"otp:{phone}", 600, hashed)
     logger.info(json.dumps({"event": "otp_stored"}))
     sendOTP_SMS(otp=otp, recpient=phone)
+    VERIF_OTP.inc()
     return {"status": True, "message": "OTP SENT SUCCESSFULLY"}
 
 @router.post("/verify-otp")
@@ -50,6 +56,7 @@ def verify_otp(payload: VerifyOTPSchema):
     ot=payload.otp
     input_hash=hashlib.sha256(ot.encode()).hexdigest()
     if input_hash != stored:
+        OTP_ERRORS.inc()
         logger.error(json.dumps({"event": "invalid_otp"}))
         raise HTTPException(status_code=401, detail="wrong OTP entered")
     pay= {"iss": "kazilen-auth", "sub":payload.phone, "exp": datetime.utcnow()+timedelta(seconds=600)}

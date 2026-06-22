@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Response, Request, APIRouter
+from fastapi import FastAPI, HTTPException, Depends, Response, Request, APIRouter, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 import os, json, hashlib, jwt
@@ -8,7 +8,9 @@ from utils.send_otp import sendOTP_SMS
 from datetime import datetime, timedelta
 from schema import SendOTPSchema, VerifyOTPSchema, CheckSchema, CreateSchema
 from dotenv import load_dotenv
+from metric import VERIF_OTP, OTP_SMS, OTP_ERRORS
 from database import sessionLocal, Customers
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 load_dotenv()
 import logging
 JWT_SECRET= os.getenv("JWT_SECRET")
@@ -34,15 +36,21 @@ redis_client = Redis(
 def chek():
     return {"status": "Running"}
 
+@router.get("/metrics")
+def metrics():
+    return Response(generate_latest(),media_type=CONTENT_TYPE_LATEST)
+
 @router.post("/send-otp")
 def send_otp(payload: SendOTPSchema):
     phone=payload.phone
     otp= otp_gen()
+    VERIF_OTP.inc()
     logger.info(json.dumps({"event": "otp_generated"}))
     hashed=hashlib.sha256(otp.encode()).hexdigest()
     redis_client.setex(f"otp:{phone}", 600, hashed)
     logger.info(json.dumps({"event": "otp_stored"}))
     sendOTP_SMS(otp=otp, recpient=phone)
+    OTP_SMS.inc()
     return {"status": True, "message": "OTP SENT SUCCESSFULLY"}
 
 @router.post("/verify-otp")
@@ -55,6 +63,7 @@ def verify_otp(payload: VerifyOTPSchema):
     ot=payload.otp
     input_hash=hashlib.sha256(ot.encode()).hexdigest()
     if input_hash != stored:
+        OTP_ERRORS.inc()
         logger.error(json.dumps({"event": "invalid_otp"}))
         raise HTTPException(status_code=401, detail="wrong OTP entered")
     pay= {"iss": "kazilen-auth", "sub":payload.phone, "exp": datetime.utcnow()+timedelta(seconds=600)}
