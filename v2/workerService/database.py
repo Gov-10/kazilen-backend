@@ -11,7 +11,7 @@ sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base=declarative_base()
 class Workers(Base):
     __tablename__ = "workers"
-    id= Column(Integer, primary_key=True, index=True)
+    id= Column(Integer, primary_key=True, index=True, autoincrement=True)
     gender=Column(String)
     name=Column(String)
     address=Column(String)

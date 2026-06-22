@@ -12,10 +12,10 @@ Base=declarative_base()
 
 class Customers(Base):
     __tablename__ = "customers"
-    id=Column(Integer, primary_key=True, index=True)
+    id=Column(Integer, primary_key=True, index=True, autoincrement=True)
     gender=Column(String)
     name=Column(String)
-    phone=Column(String, unique=True, primary_key=True)
+    phone=Column(String, unique=True)
     dob=Column(DateTime)
     address=Column(String)
 

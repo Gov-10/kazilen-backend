@@ -10,7 +10,7 @@ sessionLocal=sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base=declarative_base()
 class Bookings(Base):
     __tablename__ = "bookings"
-    id=Column(Integer, primary_key=True, index=True)
+    id=Column(Integer, primary_key=True, index=True, autoincrement=True)
     booking_id=Column(Uuid)
     customer=Column(String)
     worker=Column(String)
