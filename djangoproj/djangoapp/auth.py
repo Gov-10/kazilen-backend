@@ -12,6 +12,7 @@ redis_client = Redis(
 
 class CustomAuth(HttpBearer):
     def authenticate(self, request, token):
+        print(f"DEBUG: Token received in backend: {token}")
         key = f"session:{token}"
         phone = redis_client.get(key)
         if not phone:

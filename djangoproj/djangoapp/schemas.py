@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
+import uuid
 from ninja import Field, ModelSchema, Schema
 from redis.utils import str_if_bytes
 from .models import Customer, Worker, History
@@ -15,7 +16,7 @@ class checkPhone(Schema):
 
 
 class CustomerSchema(Schema):
-    id: int
+    id: uuid.UUID
     name: str
     address: Optional[str] = None
     phoneNo: str
