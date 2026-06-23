@@ -29,7 +29,6 @@ from django.db import connections
 from django.db.utils import OperationalError
 
 
-db_conn = connections["default"]  # will change once we migrate to neon
 
 load_dotenv()
 
@@ -158,9 +157,19 @@ def pollThis(request, payload: poll_this):
         return {"book": False}
 
 
+<<<<<<< HEAD
+=======
+@api.get("/health")
+def helchek(request):
+    return {"status": "RUNNING"}
+
+
+
+>>>>>>> 2e91c0505b576cb63f7b4595b515d4b46df0f211
 
 @api.get("/db_health")
 def db_check(request):
+    db_conn = connections["default"]  # will change once we migrate to neon
     try:
         with db_conn.cursor() as cursor:
             cursor.execute("SELECT 1")

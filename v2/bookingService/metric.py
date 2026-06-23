@@ -1,0 +1,10 @@
+from prometheus_client import Counter, Gauge, Histogram
+HEALTH_CHECKS=Counter("health_check_count", "Total number of health checks")
+BOOKINGS_CREATED=Counter("bookings_created", "Total number of bookings")
+START_OTP_COUNT=Counter("start_otp_generated", "total number of start otps created")
+START_SMS=Counter("start_sms_sent", "Total number of start sms sent")
+ACTIVE_BOOKINGS=Gauge("active_bookings_rn", "Active bookings right now")
+VERIFICATION_PENDING_BOOKINGS=Gauge("verification_pending_bookings", "verification pending waale bookings")
+END_OTP=Counter("end_otps_generated", "End otps generated")
+COMPLETED_BOOKINGS=Counter("completed_bookings", "completed bookings")
+BOOKING_DURATION=Histogram("booking_duration", "Bookings duration")
