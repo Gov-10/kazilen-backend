@@ -25,7 +25,6 @@ from djangoapp.schemas import (
 )
 from .schemas import phonePayload, CreateWorkerSchema
 
-db_conn = connections["default"]  # will change once we migrate to neon
 
 load_dotenv()
 
@@ -82,6 +81,8 @@ def unprotected_check(request, data: phonePayload):
 
 class getPro(Schema):
     userId: UUID
+    userID: UUID
+
 
 @api.post("/get-profile", auth=CustomAuth(), response=WorkerSchema)
 def get_profile(request, payload: getPro):
@@ -138,12 +139,14 @@ def update_worker_subcategories(request, data: UpdateSubSchema):
 
 class accept_booking(Schema):
     userId: UUID
+    usr: str
     accept: bool
 
 
 @api.post("/acceptBooking", auth=CustomAuth())
 def acceptBooking(request, payload: accept_booking):
     worker_ = get_object_or_404(Worker, id=payload.userId)
+    worker_ = get_object_or_404(Worker, id=payload.usr)
     work = get_object_or_404(History, id=worker_.temp_id)
     customerB = work.customer
     worker_.is_working = True
@@ -164,6 +167,7 @@ def acceptBooking(request, payload: accept_booking):
 
 class getBooking(Schema):
     userId: UUID
+    userId: str
 
 
 @api.post("/get-book", auth=CustomAuth())
@@ -177,6 +181,11 @@ class getaction(Schema):
 @api.post("/get-action")
 def getAction(request, payload: getaction):
     action = get_object_or_404(History, id=payload.userId)
+    id : str
+
+@api.post("/get-action")
+def getAction(request, payload: getaction):
+    action = get_object_or_404(History, id=payload.id)
     customer_ = action.customer
     return {
         "action": action.action,
@@ -188,6 +197,7 @@ def getAction(request, payload: getaction):
 
 class poll_this(Schema):
     userId: UUID
+    userId: str
 
 
 @api.post("/poll", auth=CustomAuth())
@@ -211,6 +221,7 @@ def unporc_get_profile(request, customer_profile):
 
 @api.get("/db_health")
 def db_check(request):
+    db_conn = connections["default"]
     try:
         with db_conn.cursor() as cursor:
             cursor.execute("SELECT 1")
@@ -218,3 +229,7 @@ def db_check(request):
     except OperationalError as e:
         print(f"DB ERROR: {e}")  # testing purposes only
         return {"status": "DB is down"}
+
+@api.get("/health")
+def helchek(request):
+    return {"status": "RUNNING"}
